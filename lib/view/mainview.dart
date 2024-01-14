@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:sqflite/sqflite.dart';
+import 'dart:core';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -115,8 +117,7 @@ class _MainViewState extends State<MainView> {
         ],
       ),
     ));
-    /*Icon(Icons.sailing),
-          Icon(Icons.bus_alert), */
+
     return Container(
       padding: const EdgeInsets.only(top: 10),
       child: Column(
@@ -162,9 +163,17 @@ class _MainViewState extends State<MainView> {
     );
   }
 
+  void initSQL() async {
+    var databasesPath = await getDatabasesPath();
+
+    var db = await openDatabase('esuroy.db');
+  }
+
   @override
   void initState() {
     super.initState();
+
+    initSQL();
   }
 
   @override
@@ -180,8 +189,8 @@ class _MainViewState extends State<MainView> {
         child: ListView(
           // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
-          children: const [
-            DrawerHeader(
+          children: [
+            const DrawerHeader(
               padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
               decoration: BoxDecoration(
                 color: Colors.blue,
@@ -189,18 +198,28 @@ class _MainViewState extends State<MainView> {
               child: Text('Selections'),
             ),
             ListTile(
-              selected: true,
-              selectedColor: Colors.green,
-              title: Text('Deals'),
+              title: const Text('Deals'),
+              onTap: () {
+                Navigator.pushNamed(context, '/dealsview');
+              },
             ),
             ListTile(
-              title: Text('Destinations'),
+              title: const Text('Destinations'),
+              onTap: () {
+                Navigator.pushNamed(context, '/destinationsview');
+              },
             ),
             ListTile(
-              title: Text('About Us'),
+              title: const Text('About Us'),
+              onTap: () {
+                Navigator.pushNamed(context, '/aboutusview');
+              },
             ),
             ListTile(
-              title: Text('Contact Us'),
+              title: const Text('Contact Us'),
+              onTap: () {
+                Navigator.pushNamed(context, '/contactusview');
+              },
             ),
           ],
         ),

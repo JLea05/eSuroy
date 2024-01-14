@@ -1,3 +1,7 @@
+import 'package:esuroy/view/aboutusview.dart';
+import 'package:esuroy/view/contactusview.dart';
+import 'package:esuroy/view/dealsview.dart';
+import 'package:esuroy/view/destinationsview.dart';
 import 'package:flutter/material.dart';
 import 'package:esuroy/view/mainview.dart';
 
@@ -19,6 +23,10 @@ class MyApp extends StatelessWidget {
       initialRoute: '/mainview',
       routes: {
         '/mainview': (context) => const MainView(),
+        '/dealsview': (context) => const DealsView(),
+        '/destinationsview': (context) => const DestinationsView(),
+        '/aboutusview': (context) => const AboutUsView(),
+        '/contactusview': (context) => const ContactUsView(),
       },
     );
   }
