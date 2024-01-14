@@ -60,6 +60,57 @@ class _DestinationsViewState extends State<DestinationsView> {
     );
   }
 
+  Future<Widget> loadImages({required String listName}) async {
+    double scrWidth = MediaQuery.of(context).size.width;
+    double scrHeight = MediaQuery.of(context).size.height;
+    String ret = await rootBundle.loadString('assets/text/${listName}List.txt');
+    List<Widget> list = [];
+
+    ret.split(',').forEach((fileName) {
+      list.add(Container(
+        width: scrWidth * 0.50,
+        margin: const EdgeInsets.fromLTRB(10, 0, 0, 10),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          image: DecorationImage(
+            image: AssetImage('assets/images/$listName/$fileName.jpg'),
+            fit: BoxFit.fill,
+          ),
+        ),
+        child: IconButton(
+          icon: const Icon(
+            Icons.image_rounded,
+            color: Color.fromARGB(0, 255, 255, 255),
+          ),
+          onPressed: () {
+            debugPrint('Pressed $fileName');
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SimpleDialog(
+                    title: const Text('Descriptions'),
+                    children: [
+                      Text(fileName),
+                    ],
+                  );
+                });
+          },
+        ),
+      ));
+    });
+
+    return Container(
+      padding: const EdgeInsets.all(2),
+      margin: const EdgeInsets.all(5),
+      width: scrWidth * 0.9,
+      height: scrHeight * 0.2,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: list,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +125,7 @@ class _DestinationsViewState extends State<DestinationsView> {
               padding: const EdgeInsets.only(top: 20, bottom: 10),
               child: Column(
                 children: [
-                  Text(
+                  const Text(
                     'DESTINATIONS',
                     style: TextStyle(
                       fontFamily: 'Calibre',
@@ -82,8 +133,8 @@ class _DestinationsViewState extends State<DestinationsView> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 100, top: 40),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 100, top: 40),
                     child: Text(
                       'Famouse Places In Surigao',
                       textAlign: TextAlign.left,
@@ -104,8 +155,8 @@ class _DestinationsViewState extends State<DestinationsView> {
                               child: CircularProgressIndicator());
                         }
                       })),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 100, top: 20),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 100, top: 20),
                     child: Text(
                       'Hotels Recommendations',
                       textAlign: TextAlign.left,
@@ -117,7 +168,7 @@ class _DestinationsViewState extends State<DestinationsView> {
                     ),
                   ),
                   FutureBuilder(
-                      future: loadImageList(),
+                      future: loadImages(listName: 'hotels'),
                       builder: ((context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.done) {
                           return snapshot.requireData;
@@ -126,8 +177,8 @@ class _DestinationsViewState extends State<DestinationsView> {
                               child: CircularProgressIndicator());
                         }
                       })),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 80, top: 20),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 80, top: 20),
                     child: Text(
                       'Restaurant Recommendations',
                       textAlign: TextAlign.left,
@@ -139,7 +190,7 @@ class _DestinationsViewState extends State<DestinationsView> {
                     ),
                   ),
                   FutureBuilder(
-                      future: loadImageList(),
+                      future: loadImages(listName: 'restaurants'),
                       builder: ((context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.done) {
                           return snapshot.requireData;

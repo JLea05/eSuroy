@@ -12,17 +12,20 @@ class _DealsViewState extends State<DealsView> {
   Future<Widget> loadImageList() async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
-    String ret = await rootBundle.loadString('assets/text/PlacesList.txt');
+    String ret = await rootBundle.loadString('assets/text/dealsList.txt');
+
     List<Widget> list = [];
 
     ret.split(',').forEach((fileName) {
+      fileName.replaceAll(RegExp(r'\n'), '');
+
       list.add(Container(
         width: scrWidth * 0.50,
         margin: const EdgeInsets.fromLTRB(10, 0, 0, 10),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
           image: DecorationImage(
-            image: AssetImage('assets/ImageList/$fileName.jpg'),
+            image: AssetImage('assets/images/deals/$fileName.jpg'),
             fit: BoxFit.fill,
           ),
         ),
@@ -37,6 +40,20 @@ class _DealsViewState extends State<DealsView> {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: list,
+      ),
+    );
+  }
+
+  Future<Widget> getText() async {
+    String ret = await rootBundle.loadString('assets/text/dealsDesc.txt');
+
+    return Text(
+      ret,
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        fontFamily: 'Arial',
+        fontSize: 16,
+        color: Color.fromARGB(172, 0, 0, 0),
       ),
     );
   }
@@ -63,9 +80,9 @@ class _DealsViewState extends State<DealsView> {
                     color: Color.fromARGB(75, 5, 177, 245),
                     borderRadius: BorderRadius.all(Radius.circular(25)),
                   ),
-                  child: const Column(
+                  child: Column(
                     children: [
-                      Text(
+                      const Text(
                         'Deals',
                         style: TextStyle(
                           fontFamily: 'Calibre',
@@ -74,23 +91,17 @@ class _DealsViewState extends State<DealsView> {
                           color: Colors.blue,
                         ),
                       ),
-                      Text(
-                        'Use the chart below to get an idea of how much to budget daily. Actual amounts will depend on YOUR travel style. Keep in mind these are daily averages … some days you’ll spend more, some days you’ll spend less. Prices are in Peso.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Arial',
-                          fontSize: 16,
-                          color: Color.fromARGB(172, 0, 0, 0),
-                        ),
-                      ),
-                      Text(
-                        'Use the chart below to get an idea of how much to budget daily. Actual amounts will depend on YOUR travel style. Keep in mind these are daily averages … some days you’ll spend more, some days you’ll spend less. Prices are in Peso.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Arial',
-                          fontSize: 16,
-                        ),
-                      ),
+                      FutureBuilder(
+                          future: getText(),
+                          builder: ((context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              return snapshot.requireData;
+                            } else {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          })),
                     ],
                   ),
                 ),
@@ -156,17 +167,17 @@ class _DealsViewState extends State<DealsView> {
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '500-600',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '100-200',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '50-100',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
@@ -180,17 +191,17 @@ class _DealsViewState extends State<DealsView> {
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '600-1000',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '200-500',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '50-100',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
@@ -204,17 +215,17 @@ class _DealsViewState extends State<DealsView> {
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '1000-3000',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '500-1000',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),
                           Text(
-                            ' ',
+                            '200-400',
                             textAlign: TextAlign.center,
                             style: cellStyle,
                           ),

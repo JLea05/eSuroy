@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
-import 'dart:core';
+import 'package:path/path.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -13,7 +13,7 @@ class MainView extends StatefulWidget {
 class _MainViewState extends State<MainView> {
   late String description;
 
-  Future<Widget> loadImageList() async {
+  Future<Widget> loadImageList(BuildContext context) async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
     String ret = await rootBundle.loadString('assets/text/PlacesList.txt');
@@ -43,6 +43,10 @@ class _MainViewState extends State<MainView> {
         children: list,
       ),
     );
+  }
+
+  Future<String> loadCSV({required String fileName}) async {
+    return await rootBundle.loadString('assets/csv/$fileName.csv');
   }
 
   Future<Widget> loadExtra() async {
@@ -165,8 +169,92 @@ class _MainViewState extends State<MainView> {
 
   void initSQL() async {
     var databasesPath = await getDatabasesPath();
+    String res = await loadCSV(fileName: 'hotel');
+    String deals = await loadCSV(fileName: 'deals');
+    String path = join(databasesPath, 'esuroy.db');
+    var db = await openDatabase(path);
 
-    var db = await openDatabase('esuroy.db');
+    var exist =
+        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="hotel"');
+
+    if (exist.isEmpty) {
+      await db.execute(
+          'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER)');
+    }
+    //await db.delete('hotel');
+    var count = await db.query('hotel');
+
+    if (count.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = res.split('\n').first.split(',');
+
+      res.split('\n').forEach((line) {
+        int index = 0;
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('hotel', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
+
+    var t2 =
+        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="deals"');
+
+    if (t2.isEmpty) {
+      await db.execute(
+          'CREATE TABLE deals (id_deals INTEGER, id_hotels INTEGER, id_res INTEGER, id_acts INTEGER, id_place INTEGER)');
+    }
+
+    var count2 = await db.query('deals');
+
+    if (count2.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = deals.split('\n').first.split(',');
+
+      deals.split('\n').forEach((line) {
+        int index = 0;
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('deals', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
   }
 
   @override
@@ -230,7 +318,7 @@ class _MainViewState extends State<MainView> {
             children: [
               Container(
                 width: scrWidth,
-                height: scrHeight * 0.35,
+                height: scrHeight * 0.45,
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(25)),
                   image: DecorationImage(
@@ -268,23 +356,60 @@ class _MainViewState extends State<MainView> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+                        //padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
                         width: scrWidth * 0.8,
                         height: scrHeight * 0.1,
-                        child: const TextField(
-                          textAlign: TextAlign.left,
-                          textAlignVertical: TextAlignVertical.center,
-                          decoration: InputDecoration(
-                            hintText: 'Mabua Pebble Beach',
-                            label: Text('Where To?'),
-                            filled: true,
-                            fillColor: Color.fromARGB(208, 255, 255, 255),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(45),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SizedBox(
+                              width: scrWidth * 0.4,
+                              height: scrHeight * 0.05,
+                              child: const TextField(
+                                textAlign: TextAlign.left,
+                                textAlignVertical: TextAlignVertical.center,
+                                keyboardType: TextInputType.numberWithOptions(),
+                                decoration: InputDecoration(
+                                  hintText: '1000',
+                                  label: Text('Min'),
+                                  filled: true,
+                                  fillColor: Color.fromARGB(208, 255, 255, 255),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(45),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            SizedBox(
+                              width: scrWidth * 0.4,
+                              height: scrHeight * 0.05,
+                              child: const TextField(
+                                textAlign: TextAlign.left,
+                                textAlignVertical: TextAlignVertical.center,
+                                keyboardType: TextInputType.numberWithOptions(),
+                                decoration: InputDecoration(
+                                  hintText: '3500',
+                                  label: Text('Max'),
+                                  filled: true,
+                                  fillColor: Color.fromARGB(208, 255, 255, 255),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(45),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: IconButton.filled(
+                          onPressed: () {},
+                          icon: const Icon(Icons.search),
                         ),
                       ),
                     ],
@@ -307,7 +432,7 @@ class _MainViewState extends State<MainView> {
             ],
           ),
           FutureBuilder(
-              future: loadImageList(),
+              future: loadImageList(context),
               builder: ((context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   return snapshot.requireData;
