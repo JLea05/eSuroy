@@ -271,7 +271,7 @@ class _MainViewState extends State<MainView> {
       });
     }
 
-    await db.delete('restaurants');
+    //await db.delete('restaurants');
     var t3 = await db
         .rawQuery('SELECT * FROM sqlite_master WHERE name="restaurants"');
 
@@ -483,8 +483,9 @@ class _MainViewState extends State<MainView> {
                         padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           border: Border.all(),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color: Color.fromARGB(148, 63, 134, 216),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
+                          color: Color.fromARGB(192, 238, 240, 242),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -495,7 +496,7 @@ class _MainViewState extends State<MainView> {
                                 fontFamily: 'Calibre',
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Color.fromARGB(219, 255, 255, 255),
+                                color: Color.fromARGB(219, 18, 17, 17),
                               ),
                             ),
                             Radio(
@@ -514,7 +515,7 @@ class _MainViewState extends State<MainView> {
                                 fontFamily: 'Calibre',
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Color.fromARGB(219, 255, 255, 255),
+                                color: Color.fromARGB(219, 10, 10, 10),
                               ),
                             ),
                             Radio(
