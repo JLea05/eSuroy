@@ -17,6 +17,7 @@ class _MainViewState extends State<MainView> {
   late String description;
   late List<Map<String, dynamic>> hotels;
   late Database db;
+  String radioVal = 'hotel';
   final TextEditingController min = TextEditingController(),
       max = TextEditingController();
   Future<Widget> loadImageList(BuildContext context) async {
@@ -175,28 +176,31 @@ class _MainViewState extends State<MainView> {
 
   void initSQL() async {
     var databasesPath = await getDatabasesPath();
-    String res = await loadCSV(fileName: 'hotel');
+    String hot = await loadCSV(fileName: 'hotel');
     String deals = await loadCSV(fileName: 'deals');
+    String res = await loadCSV(fileName: 'restaurant');
     String path = join(databasesPath, 'esuroy.db');
     db = await openDatabase(path);
 
+    //db.rawDelete('DROP TABLE hotel');
     var exist =
         await db.rawQuery('SELECT * FROM sqlite_master WHERE name="hotel"');
 
     if (exist.isEmpty) {
+      debugPrint('Created Table hotel!');
       await db.execute(
-          'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER)');
+          'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL)');
     }
-    //await db.delete('hotel');
-    //await db.delete('deals');
 
+    //await db.delete('deals');
+    //await db.delete('hotel');
     var count = await db.query('hotel');
 
     if (count.isEmpty) {
       List<Map<String, dynamic>> map = [];
-      var columName = res.split('\n').first.split(',');
+      var columName = hot.split('\n').first.split(',');
 
-      res.split('\n').forEach((line) {
+      hot.split('\n').forEach((line) {
         int index = 0;
         line = line.replaceAll(RegExp(r'"'), '');
 
@@ -266,6 +270,51 @@ class _MainViewState extends State<MainView> {
         debugPrint(element.toString());
       });
     }
+
+    await db.delete('restaurants');
+    var t3 = await db
+        .rawQuery('SELECT * FROM sqlite_master WHERE name="restaurants"');
+
+    if (t3.isEmpty) {
+      debugPrint('Create restaurant table');
+      await db.execute(
+          'CREATE TABLE restaurants (id INTEGER, name TEXT, min INTEGER, max INTEGER, lat REAL, long REAL)');
+    }
+
+    var count3 = await db.query('restaurants');
+
+    if (count3.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = res.split('\n').first.split(',');
+
+      debugPrint('Columns: ${columName.toString()}');
+      res.split('\n').forEach((line) {
+        int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('restaurants', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
   }
 
   @override
@@ -287,6 +336,7 @@ class _MainViewState extends State<MainView> {
   Widget build(BuildContext context) {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('eSuroy'),
@@ -337,7 +387,7 @@ class _MainViewState extends State<MainView> {
             children: [
               Container(
                 width: scrWidth,
-                height: scrHeight * 0.45,
+                height: scrHeight * 0.55,
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(25)),
                   image: DecorationImage(
@@ -429,6 +479,58 @@ class _MainViewState extends State<MainView> {
                         ),
                       ),
                       Container(
+                        width: scrWidth * 0.8,
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          border: Border.all(),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Color.fromARGB(148, 63, 134, 216),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Hotel',
+                              style: TextStyle(
+                                fontFamily: 'Calibre',
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(219, 255, 255, 255),
+                              ),
+                            ),
+                            Radio(
+                              value: 'hotel',
+                              groupValue: radioVal,
+                              onChanged: (value) {
+                                debugPrint('Hotel Selected!');
+                                setState(() {
+                                  radioVal = 'hotel';
+                                });
+                              },
+                            ),
+                            const Text(
+                              'Restaurant',
+                              style: TextStyle(
+                                fontFamily: 'Calibre',
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(219, 255, 255, 255),
+                              ),
+                            ),
+                            Radio(
+                              value: 'restaurant',
+                              groupValue: radioVal,
+                              onChanged: (value) {
+                                debugPrint('Restaurant Selected!');
+                                setState(() {
+                                  radioVal = 'restaurant';
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
                         padding: const EdgeInsets.only(top: 2),
                         child: IconButton.filled(
                           onPressed: () async {
@@ -436,9 +538,13 @@ class _MainViewState extends State<MainView> {
                             int minVal = int.parse(min.text);
 
                             int maxVal = int.parse(max.text);
-                            var queried = await db.query('hotel',
+
+                            var queried = await db.query(
+                                radioVal == 'hotel' ? 'hotel' : 'restaurants',
                                 distinct: true,
-                                columns: ['hotelName'],
+                                columns: [
+                                  radioVal == 'hotel' ? 'hotelName' : 'name'
+                                ],
                                 where: 'min >= ? AND max <= ?',
                                 whereArgs: [minVal, maxVal]);
                             debugPrint('Content Count: ${queried.length}');
@@ -454,7 +560,9 @@ class _MainViewState extends State<MainView> {
                               MaterialPageRoute(
                                 builder: (context) => SuggestionsView(
                                   hotelNames: name,
+                                  resNames: name,
                                   db: db,
+                                  selected: radioVal == 'hotel' ? 1 : 2,
                                 ),
                               ),
                             );
