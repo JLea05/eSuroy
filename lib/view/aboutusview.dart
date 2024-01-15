@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class AboutUsView extends StatefulWidget {
   const AboutUsView({super.key});
@@ -8,6 +9,19 @@ class AboutUsView extends StatefulWidget {
 }
 
 class _AboutUsViewState extends State<AboutUsView> {
+  Future<Widget> getText() async {
+    String ret = await rootBundle.loadString('assets/text/aboutus.txt');
+    return Text(
+      ret,
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        fontFamily: 'Arial',
+        fontSize: 18,
+        fontWeight: FontWeight.normal,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,8 +31,8 @@ class _AboutUsViewState extends State<AboutUsView> {
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         child: ListView(
-          children: const [
-            Padding(
+          children: [
+            const Padding(
               padding: EdgeInsets.only(top: 20),
               child: Text(
                 'About US',
@@ -30,7 +44,7 @@ class _AboutUsViewState extends State<AboutUsView> {
                 ),
               ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(top: 20, left: 10),
               child: Text(
                 'What is eSuroy?',
@@ -43,44 +57,18 @@ class _AboutUsViewState extends State<AboutUsView> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(
+              padding: const EdgeInsets.only(
                 top: 10,
               ),
-              child: Text(
-                'eSuroy is about selling drugs like cocaine and meth which has a huge market in the philippines. The previous president has now gone and we can now continue selling drugs',
-                textAlign: TextAlign.justify,
-                style: TextStyle(
-                  fontFamily: 'Arial',
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 20, left: 10),
-              child: Text(
-                'Our Goals are to:',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontFamily: 'Calibre',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.only(
-                top: 10,
-              ),
-              child: Text(
-                '-Selling Illegal Drugs\n-Making Money-\nGain Power\n-Control The Government',
-                textAlign: TextAlign.justify,
-                style: TextStyle(
-                  fontFamily: 'Arial',
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal,
-                ),
+              child: FutureBuilder(
+                future: getText(),
+                builder: ((context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return snapshot.requireData;
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                }),
               ),
             ),
           ],

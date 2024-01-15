@@ -350,9 +350,13 @@ class _MainViewState extends State<MainView> {
             const DrawerHeader(
               padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
               decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/logo/splash.png'),
+                  fit: BoxFit.fill,
+                ),
                 color: Colors.blue,
               ),
-              child: Text('Selections'),
+              child: Text('eSuroy'),
             ),
             ListTile(
               title: const Text('Deals'),
