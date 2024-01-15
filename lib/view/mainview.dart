@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:esuroy/view/suggestionsview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
@@ -12,7 +15,10 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> {
   late String description;
-
+  late List<Map<String, dynamic>> hotels;
+  late Database db;
+  final TextEditingController min = TextEditingController(),
+      max = TextEditingController();
   Future<Widget> loadImageList(BuildContext context) async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
@@ -172,7 +178,7 @@ class _MainViewState extends State<MainView> {
     String res = await loadCSV(fileName: 'hotel');
     String deals = await loadCSV(fileName: 'deals');
     String path = join(databasesPath, 'esuroy.db');
-    var db = await openDatabase(path);
+    db = await openDatabase(path);
 
     var exist =
         await db.rawQuery('SELECT * FROM sqlite_master WHERE name="hotel"');
@@ -182,6 +188,8 @@ class _MainViewState extends State<MainView> {
           'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER)');
     }
     //await db.delete('hotel');
+    //await db.delete('deals');
+
     var count = await db.query('hotel');
 
     if (count.isEmpty) {
@@ -190,6 +198,8 @@ class _MainViewState extends State<MainView> {
 
       res.split('\n').forEach((line) {
         int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
+
         debugPrint('Line: $line');
         Map<String, dynamic> l = {};
         line.split(',').forEach((str) {
@@ -203,7 +213,7 @@ class _MainViewState extends State<MainView> {
       });
 
       map.removeAt(0);
-
+      hotels = map;
       for (var c in map) {
         await db.insert('hotel', c);
         debugPrint('INSERT: $c');
@@ -231,6 +241,7 @@ class _MainViewState extends State<MainView> {
 
       deals.split('\n').forEach((line) {
         int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
         debugPrint('Line: $line');
         Map<String, dynamic> l = {};
         line.split(',').forEach((str) {
@@ -262,6 +273,14 @@ class _MainViewState extends State<MainView> {
     super.initState();
 
     initSQL();
+  }
+
+  @override
+  void dispose() {
+    min.dispose();
+    max.dispose();
+    db.close();
+    super.dispose();
   }
 
   @override
@@ -365,11 +384,13 @@ class _MainViewState extends State<MainView> {
                             SizedBox(
                               width: scrWidth * 0.4,
                               height: scrHeight * 0.05,
-                              child: const TextField(
+                              child: TextField(
+                                controller: min,
                                 textAlign: TextAlign.left,
                                 textAlignVertical: TextAlignVertical.center,
-                                keyboardType: TextInputType.numberWithOptions(),
-                                decoration: InputDecoration(
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(),
+                                decoration: const InputDecoration(
                                   hintText: '1000',
                                   label: Text('Min'),
                                   filled: true,
@@ -385,11 +406,13 @@ class _MainViewState extends State<MainView> {
                             SizedBox(
                               width: scrWidth * 0.4,
                               height: scrHeight * 0.05,
-                              child: const TextField(
+                              child: TextField(
+                                controller: max,
                                 textAlign: TextAlign.left,
                                 textAlignVertical: TextAlignVertical.center,
-                                keyboardType: TextInputType.numberWithOptions(),
-                                decoration: InputDecoration(
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(),
+                                decoration: const InputDecoration(
                                   hintText: '3500',
                                   label: Text('Max'),
                                   filled: true,
@@ -408,7 +431,34 @@ class _MainViewState extends State<MainView> {
                       Container(
                         padding: const EdgeInsets.only(top: 2),
                         child: IconButton.filled(
-                          onPressed: () {},
+                          onPressed: () async {
+                            debugPrint('MIN: ${min.text} MAX: ${max.text}');
+                            int minVal = int.parse(min.text);
+
+                            int maxVal = int.parse(max.text);
+                            var queried = await db.query('hotel',
+                                distinct: true,
+                                columns: ['hotelName'],
+                                where: 'min >= ? AND max <= ?',
+                                whereArgs: [minVal, maxVal]);
+                            debugPrint('Content Count: ${queried.length}');
+                            debugPrint(queried.toString());
+
+                            List<String> name = [];
+                            queried.forEach((val) {
+                              name.add(val.values.toList().first.toString());
+                            });
+                            debugPrint('Array: ${name.toString()}');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SuggestionsView(
+                                  hotelNames: name,
+                                  db: db,
+                                ),
+                              ),
+                            );
+                          },
                           icon: const Icon(Icons.search),
                         ),
                       ),
