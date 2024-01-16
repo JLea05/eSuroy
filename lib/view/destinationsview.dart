@@ -16,41 +16,54 @@ class _DestinationsViewState extends State<DestinationsView> {
     List<Widget> list = [];
 
     ret.split(',').forEach((fileName) {
-      list.add(Container(
-        width: scrWidth * 0.50,
-        margin: const EdgeInsets.fromLTRB(10, 0, 0, 10),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(15)),
-          image: DecorationImage(
-            image: AssetImage('assets/ImageList/$fileName.jpg'),
-            fit: BoxFit.fill,
+      list.add(
+        Container(
+          width: scrWidth * 0.50,
+          margin: const EdgeInsets.fromLTRB(10, 0, 0, 10),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(15)),
+            image: DecorationImage(
+              image: AssetImage('assets/ImageList/$fileName.jpg'),
+              fit: BoxFit.fill,
+            ),
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.image_rounded,
+              color: Color.fromARGB(0, 255, 255, 255),
+            ),
+            onPressed: () {
+              debugPrint('Pressed $fileName');
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SimpleDialog(
+                      title: const Text('Descriptions'),
+                      children: [
+                        Text(fileName),
+                      ],
+                    );
+                  });
+            },
           ),
         ),
-        child: IconButton(
-          icon: const Icon(
-            Icons.image_rounded,
-            color: Color.fromARGB(0, 255, 255, 255),
-          ),
-          onPressed: () {
-            debugPrint('Pressed $fileName');
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return SimpleDialog(
-                    title: Text('Descriptions'),
-                    children: [
-                      Text(fileName),
-                    ],
-                  );
-                });
-          },
-        ),
-      ));
+      );
     });
 
     return Container(
-      padding: const EdgeInsets.all(2),
-      margin: const EdgeInsets.all(5),
+      padding: const EdgeInsets.only(top: 10, bottom: 10),
+      margin: const EdgeInsets.only(top: 10, bottom: 10),
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(204, 210, 237, 248),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+        boxShadow: [
+          BoxShadow(
+            color: Color.fromARGB(255, 57, 156, 173),
+            spreadRadius: 2,
+            blurRadius: 2,
+          )
+        ],
+      ),
       width: scrWidth * 0.9,
       height: scrHeight * 0.2,
       child: ListView(
@@ -100,8 +113,19 @@ class _DestinationsViewState extends State<DestinationsView> {
     });
 
     return Container(
-      padding: const EdgeInsets.all(2),
-      margin: const EdgeInsets.all(5),
+      padding: const EdgeInsets.only(top: 10, bottom: 10),
+      margin: const EdgeInsets.only(top: 10, bottom: 10),
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(204, 210, 237, 248),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+        boxShadow: [
+          BoxShadow(
+            color: Color.fromARGB(255, 57, 156, 173),
+            spreadRadius: 2,
+            blurRadius: 2,
+          )
+        ],
+      ),
       width: scrWidth * 0.9,
       height: scrHeight * 0.2,
       child: ListView(

@@ -1,5 +1,8 @@
 import 'dart:ffi';
 
+import 'package:esuroy/view/aboutusview.dart';
+import 'package:esuroy/view/contactusview.dart';
+import 'package:esuroy/view/reviewsview.dart';
 import 'package:esuroy/view/suggestionsview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -191,6 +194,13 @@ class _MainViewState extends State<MainView> {
       await db.execute(
           'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL)');
     }
+    var feedbackTable =
+        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="feedback"');
+    if (feedbackTable.isEmpty) {
+      debugPrint('Created feedback table!');
+      await db.execute(
+          'CREATE TABLE feedback (name TEXT, phone TEXT, email TEXT, message TEXT)');
+    }
 
     //await db.delete('deals');
     //await db.delete('hotel');
@@ -379,7 +389,19 @@ class _MainViewState extends State<MainView> {
             ListTile(
               title: const Text('Contact Us'),
               onTap: () {
-                Navigator.pushNamed(context, '/contactusview');
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ContactUsView(db: db)));
+              },
+            ),
+            ListTile(
+              title: const Text('Reviews'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ReviewsView(db: db)));
               },
             ),
           ],
@@ -489,7 +511,7 @@ class _MainViewState extends State<MainView> {
                           border: Border.all(),
                           borderRadius:
                               const BorderRadius.all(Radius.circular(10)),
-                          color: Color.fromARGB(192, 238, 240, 242),
+                          color: const Color.fromARGB(192, 238, 240, 242),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
