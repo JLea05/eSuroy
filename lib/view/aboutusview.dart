@@ -25,10 +25,23 @@ class _AboutUsViewState extends State<AboutUsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('eSuroy'),
+        foregroundColor: Colors.blue,
+      ),
       body: Container(
+        padding: const EdgeInsets.only(top: 10, bottom: 10),
+        margin: const EdgeInsets.all(10),
         decoration: const BoxDecoration(
-          color: Color.fromARGB(75, 5, 177, 245),
+          color: Color.fromARGB(204, 210, 237, 248),
           borderRadius: BorderRadius.all(Radius.circular(15)),
+          boxShadow: [
+            BoxShadow(
+              color: Color.fromARGB(255, 57, 156, 173),
+              spreadRadius: 2,
+              blurRadius: 2,
+            )
+          ],
         ),
         child: ListView(
           children: [

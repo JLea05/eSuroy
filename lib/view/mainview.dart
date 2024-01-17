@@ -41,11 +41,32 @@ class _MainViewState extends State<MainView> {
             fit: BoxFit.fill,
           ),
         ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(156, 255, 255, 255),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  fileName,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ));
     });
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
       width: scrWidth,
       height: scrHeight * 0.30,
       child: ListView(
@@ -133,7 +154,19 @@ class _MainViewState extends State<MainView> {
     ));
 
     return Container(
-      padding: const EdgeInsets.only(top: 10),
+      margin: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(25),
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(253, 252, 252, 252),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+        boxShadow: [
+          BoxShadow(
+            color: Color.fromARGB(255, 57, 156, 173),
+            spreadRadius: 3,
+            blurRadius: 5,
+          )
+        ],
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,12 +179,19 @@ class _MainViewState extends State<MainView> {
     String ret = await rootBundle.loadString('assets/text/Description.txt');
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(25),
       decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        color: Color.fromARGB(98, 63, 134, 216),
+        color: Color.fromARGB(253, 252, 252, 252),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+        boxShadow: [
+          BoxShadow(
+            color: Color.fromARGB(255, 57, 156, 173),
+            spreadRadius: 3,
+            blurRadius: 5,
+          )
+        ],
       ),
-      padding: const EdgeInsets.only(top: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -414,6 +454,7 @@ class _MainViewState extends State<MainView> {
               Container(
                 width: scrWidth,
                 height: scrHeight * 0.55,
+                margin: const EdgeInsets.only(left: 10, right: 10),
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(25)),
                   image: DecorationImage(
@@ -439,7 +480,7 @@ class _MainViewState extends State<MainView> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
                         child: const Text(
                           'EXPLORE THE BEAUTY\nOF SURIGAO CITY',
                           textAlign: TextAlign.center,
@@ -451,62 +492,9 @@ class _MainViewState extends State<MainView> {
                         ),
                       ),
                       Container(
-                        //padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-                        width: scrWidth * 0.8,
-                        height: scrHeight * 0.1,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            SizedBox(
-                              width: scrWidth * 0.4,
-                              height: scrHeight * 0.05,
-                              child: TextField(
-                                controller: min,
-                                textAlign: TextAlign.left,
-                                textAlignVertical: TextAlignVertical.center,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(),
-                                decoration: const InputDecoration(
-                                  hintText: '1000',
-                                  label: Text('Min'),
-                                  filled: true,
-                                  fillColor: Color.fromARGB(208, 255, 255, 255),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(45),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: scrWidth * 0.4,
-                              height: scrHeight * 0.05,
-                              child: TextField(
-                                controller: max,
-                                textAlign: TextAlign.left,
-                                textAlignVertical: TextAlignVertical.center,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(),
-                                decoration: const InputDecoration(
-                                  hintText: '3500',
-                                  label: Text('Max'),
-                                  filled: true,
-                                  fillColor: Color.fromARGB(208, 255, 255, 255),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(45),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
                         width: scrWidth * 0.8,
                         padding: const EdgeInsets.all(5),
+                        margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
                           border: Border.all(),
                           borderRadius:
@@ -558,8 +546,100 @@ class _MainViewState extends State<MainView> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.only(top: 2),
+                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+                        margin: const EdgeInsets.only(
+                          left: 10,
+                          right: 10,
+                        ),
+                        width: scrWidth,
+                        height: scrHeight * 0.1,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(193, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(width: 2),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            const Text(
+                              'Price Range: ',
+                              style: TextStyle(
+                                fontFamily: 'Arial',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(
+                              width: scrWidth * 0.25,
+                              height: scrHeight * 0.05,
+                              child: TextField(
+                                controller: min,
+                                textAlign: TextAlign.left,
+                                textAlignVertical: TextAlignVertical.center,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(),
+                                decoration: const InputDecoration(
+                                  hintText: '1000',
+                                  label: Text('Min'),
+                                  filled: true,
+                                  fillColor: Color.fromARGB(208, 255, 255, 255),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(45),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: scrWidth * 0.25,
+                              height: scrHeight * 0.05,
+                              child: TextField(
+                                controller: max,
+                                textAlign: TextAlign.left,
+                                textAlignVertical: TextAlignVertical.center,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(),
+                                decoration: const InputDecoration(
+                                  hintText: '3500',
+                                  label: Text('Max'),
+                                  filled: true,
+                                  fillColor: Color.fromARGB(208, 255, 255, 255),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(45),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: scrWidth * 0.4,
+                        height: scrHeight * 0.07,
+                        padding: const EdgeInsets.only(top: 10),
                         child: IconButton.filled(
+                          style: const ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll(
+                              Color.fromARGB(217, 255, 255, 255),
+                            ),
+                            foregroundColor: MaterialStatePropertyAll(
+                              Color.fromARGB(141, 0, 0, 0),
+                            ),
+                            shape: MaterialStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(20),
+                                ),
+                              ),
+                            ),
+                            side: MaterialStatePropertyAll(
+                              BorderSide(width: 2),
+                            ),
+                          ),
                           onPressed: () async {
                             debugPrint('MIN: ${min.text} MAX: ${max.text}');
                             int minVal = int.parse(min.text);
@@ -594,7 +674,24 @@ class _MainViewState extends State<MainView> {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.search),
+                          icon: const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                'Search',
+                                style: TextStyle(
+                                  color: Color.fromARGB(192, 0, 0, 0),
+                                  fontFamily: 'Arial',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Icon(
+                                Icons.search,
+                                size: 24,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -602,29 +699,47 @@ class _MainViewState extends State<MainView> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.fromLTRB(0, 25, 30, 10),
-                child: const Text(
-                  'Surigao City Attractions',
-                  textAlign: TextAlign.left,
-                  maxLines: 1,
-                  style: TextStyle(
-                      color: Colors.blue,
-                      fontFamily: 'Arial',
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold),
+                padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
+                margin: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(255, 207, 244, 245),
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(255, 57, 156, 173),
+                      spreadRadius: 3,
+                      blurRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Surigao City Attractions',
+                      textAlign: TextAlign.left,
+                      maxLines: 1,
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 0, 0, 0),
+                          fontFamily: 'Arial',
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    FutureBuilder(
+                        future: loadImageList(context),
+                        builder: ((context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            return snapshot.requireData;
+                          } else {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                        })),
+                  ],
                 ),
               ),
             ],
           ),
-          FutureBuilder(
-              future: loadImageList(context),
-              builder: ((context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return snapshot.requireData;
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              })),
           Container(
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
             child: FutureBuilder(

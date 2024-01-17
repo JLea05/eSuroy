@@ -67,6 +67,10 @@ class _DealsViewState extends State<DealsView> {
     );
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('eSuroy'),
+        foregroundColor: Colors.blue,
+      ),
       body: ListView(
         children: [
           Container(

@@ -82,7 +82,7 @@ class _DestinationsViewState extends State<DestinationsView> {
     ret.split(',').forEach((fileName) {
       list.add(Container(
         width: scrWidth * 0.50,
-        margin: const EdgeInsets.fromLTRB(10, 0, 0, 10),
+        margin: const EdgeInsets.fromLTRB(10, 0, 0, 20),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
           image: DecorationImage(
@@ -137,97 +137,106 @@ class _DestinationsViewState extends State<DestinationsView> {
 
   @override
   Widget build(BuildContext context) {
+    double scrWidth = MediaQuery.of(context).size.width;
+    double scrHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Container(
-        child: ListView(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(75, 5, 177, 245),
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-              ),
-              padding: const EdgeInsets.only(top: 20, bottom: 10),
-              child: Column(
-                children: [
-                  const Text(
-                    'DESTINATIONS',
+      appBar: AppBar(
+        title: const Text('eSuroy'),
+        foregroundColor: Colors.blue,
+      ),
+      body: ListView(
+        children: [
+          Container(
+            padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
+            margin: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 251, 255, 255),
+              borderRadius: BorderRadius.all(Radius.circular(15)),
+              boxShadow: [
+                BoxShadow(
+                  color: Color.fromARGB(255, 57, 156, 173),
+                  spreadRadius: 3,
+                  blurRadius: 5,
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'DESTINATIONS',
+                  style: TextStyle(
+                    fontFamily: 'Calibre',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(right: 50, top: 40),
+                  child: Text(
+                    'Famouse Places In Surigao',
+                    textAlign: TextAlign.left,
                     style: TextStyle(
-                      fontFamily: 'Calibre',
-                      fontSize: 24,
+                      fontFamily: 'Arial',
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 100, top: 40),
-                    child: Text(
-                      'Famouse Places In Surigao',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontFamily: 'Arial',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ),
+                FutureBuilder(
+                    future: loadImageList(),
+                    builder: ((context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return snapshot.requireData;
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    })),
+                const Padding(
+                  padding: EdgeInsets.only(right: 50, top: 20),
+                  child: Text(
+                    'Hotels Recommendations',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontFamily: 'Arial',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  FutureBuilder(
-                      future: loadImageList(),
-                      builder: ((context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return snapshot.requireData;
-                        } else {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                      })),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 100, top: 20),
-                    child: Text(
-                      'Hotels Recommendations',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontFamily: 'Arial',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ),
+                FutureBuilder(
+                    future: loadImages(listName: 'hotels'),
+                    builder: ((context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return snapshot.requireData;
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    })),
+                const Padding(
+                  padding: EdgeInsets.only(right: 20, top: 20),
+                  child: Text(
+                    'Restaurant Recommendations',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontFamily: 'Arial',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  FutureBuilder(
-                      future: loadImages(listName: 'hotels'),
-                      builder: ((context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return snapshot.requireData;
-                        } else {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                      })),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 80, top: 20),
-                    child: Text(
-                      'Restaurant Recommendations',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontFamily: 'Arial',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  FutureBuilder(
-                      future: loadImages(listName: 'restaurants'),
-                      builder: ((context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return snapshot.requireData;
-                        } else {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                      })),
-                ],
-              ),
-            )
-          ],
-        ),
+                ),
+                FutureBuilder(
+                    future: loadImages(listName: 'restaurants'),
+                    builder: ((context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return snapshot.requireData;
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    })),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
