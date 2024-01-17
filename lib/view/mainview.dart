@@ -226,6 +226,7 @@ class _MainViewState extends State<MainView> {
     db = await openDatabase(path);
 
     //db.rawDelete('DROP TABLE hotel');
+    db.rawDelete('DROP TABLE rating');
     var exist =
         await db.rawQuery('SELECT * FROM sqlite_master WHERE name="hotel"');
 
@@ -235,11 +236,11 @@ class _MainViewState extends State<MainView> {
           'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL)');
     }
     var feedbackTable =
-        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="feedback"');
+        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="rating"');
     if (feedbackTable.isEmpty) {
-      debugPrint('Created feedback table!');
+      debugPrint('Created rating table!');
       await db.execute(
-          'CREATE TABLE feedback (name TEXT, phone TEXT, email TEXT, message TEXT)');
+          'CREATE TABLE rating (name TEXT, phone TEXT, email TEXT, message TEXT, rating REAL, hotelName TEXT)');
     }
 
     //await db.delete('deals');
@@ -429,10 +430,7 @@ class _MainViewState extends State<MainView> {
             ListTile(
               title: const Text('Contact Us'),
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ContactUsView(db: db)));
+                Navigator.pushNamed(context, 'contactusview');
               },
             ),
             ListTile(
