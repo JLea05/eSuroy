@@ -33,13 +33,13 @@ class _AboutUsViewState extends State<AboutUsView> {
         padding: const EdgeInsets.only(top: 10, bottom: 10),
         margin: const EdgeInsets.all(10),
         decoration: const BoxDecoration(
-          color: Color.fromARGB(204, 210, 237, 248),
+          color: Color.fromARGB(255, 255, 255, 255),
           borderRadius: BorderRadius.all(Radius.circular(15)),
           boxShadow: [
             BoxShadow(
               color: Color.fromARGB(255, 57, 156, 173),
-              spreadRadius: 2,
-              blurRadius: 2,
+              spreadRadius: 3,
+              blurRadius: 5,
             )
           ],
         ),

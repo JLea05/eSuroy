@@ -39,7 +39,7 @@ class _ContactUsViewState extends State<ContactUsView> {
               ),
               Container(
                 width: scrWidth * 0.8,
-                height: scrHeight * 0.6,
+                height: scrHeight * 0.5,
                 margin: const EdgeInsets.all(15),
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(255, 255, 255, 255),
@@ -54,12 +54,17 @@ class _ContactUsViewState extends State<ContactUsView> {
                 ),
                 padding: const EdgeInsets.all(25),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    const Image(
-                      image: AssetImage(
-                        'assets/images/dev/lea.jpg',
+                    SizedBox(
+                      height: scrHeight * 0.35,
+                      width: scrWidth * 0.85,
+                      child: const Image(
+                        image: AssetImage(
+                          'assets/images/dev/lea.jpg',
+                        ),
+                        fit: BoxFit.fill,
                       ),
-                      fit: BoxFit.fill,
                     ),
                     Text(
                       'Name: Lea June Almazan',
@@ -78,7 +83,7 @@ class _ContactUsViewState extends State<ContactUsView> {
               ),
               Container(
                 width: scrWidth * 0.8,
-                height: scrHeight * 0.45,
+                height: scrHeight * 0.5,
                 margin: const EdgeInsets.all(15),
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(254, 252, 252, 252),
@@ -91,14 +96,19 @@ class _ContactUsViewState extends State<ContactUsView> {
                     )
                   ],
                 ),
-                padding: const EdgeInsets.all(25),
+                padding: const EdgeInsets.all(15),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    const Image(
-                      image: AssetImage(
-                        'assets/images/dev/cherry.jpg',
+                    SizedBox(
+                      height: scrHeight * 0.35,
+                      width: scrWidth * 0.85,
+                      child: const Image(
+                        image: AssetImage(
+                          'assets/images/dev/cherry.jpg',
+                        ),
+                        fit: BoxFit.fill,
                       ),
-                      fit: BoxFit.fill,
                     ),
                     Text(
                       'Name: Cherry Fe Pilan',

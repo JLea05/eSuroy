@@ -1,14 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:sqflite/sqflite.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DestinationsView extends StatefulWidget {
-  const DestinationsView({super.key});
+  final Database db;
+  const DestinationsView({required this.db, super.key});
 
   @override
   State<DestinationsView> createState() => _DestinationsViewState();
 }
 
 class _DestinationsViewState extends State<DestinationsView> {
+  Future<List<String>> getActNames(String fileName) async {
+    List<String> actNames = [];
+    var queried = await widget.db.query('placeName',
+        columns: ['id'], where: 'placeName LIKE ?', whereArgs: ['%$fileName%']);
+    var actIds = await widget.db.query(
+      'ids',
+      columns: ['actId'],
+      where: 'placeId = ?',
+      whereArgs: [queried.first['id'].toString()],
+    );
+    for (var actID in actIds) {
+      /*widget.db
+          .query('activities',
+              columns: ['actName'],
+              where: 'id = ?',
+              whereArgs: [actID['actId'].toString()])
+          .then((actName) {
+        actNames.add(actName.first['actName'].toString());
+        debugPrint('Adding data to actnames');
+      });*/
+      var actName = await widget.db.query('activities',
+          columns: ['actName'],
+          where: 'id = ?',
+          whereArgs: [actID['actId'].toString()]);
+      actNames.add(actName.first['actName'].toString());
+    }
+
+    return actNames;
+    /*widget.db
+        .query('placeName',
+            columns: ['id'],
+            where: 'placeName LIKE ?',
+            whereArgs: ['%$fileName%'])
+        .then(
+      (queried) {
+        widget.db
+            .query(
+          'ids',
+          columns: ['actId'],
+          where: 'placeId = ?',
+          whereArgs: [queried.first['id'].toString()],
+        )
+            .then(
+          (actIds) {
+            List<String> actNames = [];
+            for (var actID in actIds) {
+              widget.db
+                  .query('activities',
+                      columns: ['actName'],
+                      where: 'id = ?',
+                      whereArgs: [actID['actId'].toString()])
+                  .then((actName) {
+                actNames.add(actName.first['actName'].toString());
+                debugPrint('Adding data to actnames');
+              });
+            }
+          },
+        );
+      },
+    );*/
+  }
+
   Future<Widget> loadImageList() async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
@@ -33,17 +98,65 @@ class _DestinationsViewState extends State<DestinationsView> {
               color: Color.fromARGB(0, 255, 255, 255),
             ),
             onPressed: () {
-              debugPrint('Pressed $fileName');
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return SimpleDialog(
-                      title: const Text('Descriptions'),
-                      children: [
-                        Text(fileName),
-                      ],
-                    );
-                  });
+              getActNames(fileName).then(
+                (actNames) {
+                  List<Widget> wid = [];
+                  wid.add(Text(
+                    fileName,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: 'Calibre',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ));
+                  wid.add(Container(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: const Text(
+                      'Activities: ',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontFamily: 'Calibre',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ));
+                  for (var name in actNames) {
+                    wid.add(Container(
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        bottom: 10,
+                        top: 10,
+                      ),
+                      child: Text(
+                        '* $name',
+                        style: const TextStyle(
+                          fontFamily: 'Arial',
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ));
+                  }
+
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SimpleDialog(
+                          title: const Text(
+                            'Descriptions',
+                            style: TextStyle(
+                              fontFamily: 'Calibre',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          children: wid,
+                        );
+                      });
+                },
+              );
             },
           ),
         ),
@@ -73,6 +186,12 @@ class _DestinationsViewState extends State<DestinationsView> {
     );
   }
 
+  Future<void> launchUrlText(Uri uri) async {
+    if (!await launchUrl(uri)) {
+      throw Exception('Could Not Launch URL');
+    }
+  }
+
   Future<Widget> loadImages({required String listName}) async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
@@ -96,17 +215,40 @@ class _DestinationsViewState extends State<DestinationsView> {
             color: Color.fromARGB(0, 255, 255, 255),
           ),
           onPressed: () {
-            debugPrint('Pressed $fileName');
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return SimpleDialog(
-                    title: const Text('Descriptions'),
-                    children: [
-                      Text(fileName),
-                    ],
-                  );
-                });
+            widget.db
+                .query(listName == 'restaurants' ? 'restaurants' : 'hotel',
+                    columns: ['url', 'contact'],
+                    where: listName == 'restaurants'
+                        ? 'name = ?'
+                        : 'hotelName = ?',
+                    whereArgs: [fileName])
+                .then(
+              (queried) {
+                debugPrint('Pressed $fileName');
+                final Uri _uri = Uri.parse(queried.first['url'].toString());
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SimpleDialog(
+                        title: const Text('Descriptions'),
+                        children: [
+                          Text(fileName),
+                          Text(
+                              'Contact Info: ${queried.first['contact'].toString()}'),
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (queried.first['url'].toString() !=
+                                  'unavailable') {
+                                await launchUrlText(_uri);
+                              }
+                            },
+                            child: Text(queried.first['url'].toString()),
+                          ),
+                        ],
+                      );
+                    });
+              },
+            );
           },
         ),
       ));

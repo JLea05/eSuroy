@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/mainview': (context) => const MainView(),
         '/dealsview': (context) => const DealsView(),
-        '/destinationsview': (context) => const DestinationsView(),
+        //'/destinationsview': (context) => const DestinationsView(),
         '/aboutusview': (context) => const AboutUsView(),
         '/contactusview': (context) => const ContactUsView(),
       },

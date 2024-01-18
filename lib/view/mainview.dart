@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:esuroy/view/aboutusview.dart';
 import 'package:esuroy/view/contactusview.dart';
+import 'package:esuroy/view/destinationsview.dart';
 import 'package:esuroy/view/reviewsview.dart';
 import 'package:esuroy/view/suggestionsview.dart';
 import 'package:flutter/material.dart';
@@ -222,18 +223,21 @@ class _MainViewState extends State<MainView> {
     String hot = await loadCSV(fileName: 'hotel');
     String deals = await loadCSV(fileName: 'deals');
     String res = await loadCSV(fileName: 'restaurant');
+    String act = await loadCSV(fileName: 'activities');
+    String ids = await loadCSV(fileName: 'id');
+    String placeName = await loadCSV(fileName: 'placeName');
     String path = join(databasesPath, 'esuroy.db');
     db = await openDatabase(path);
 
     //db.rawDelete('DROP TABLE hotel');
-    db.rawDelete('DROP TABLE rating');
+    //db.rawDelete('DROP TABLE rating');
     var exist =
         await db.rawQuery('SELECT * FROM sqlite_master WHERE name="hotel"');
 
     if (exist.isEmpty) {
       debugPrint('Created Table hotel!');
       await db.execute(
-          'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL)');
+          'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL, url TEXT, contact TEXT)');
     }
     //await db.delete('rating');
     var feedbackTable =
@@ -261,7 +265,7 @@ class _MainViewState extends State<MainView> {
         line.split(',').forEach((str) {
           l[columName[index]] = str;
           debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
+          debugPrint('SQL: ${columName[index]} : ${str.toString()}');
 
           index++;
         });
@@ -318,10 +322,11 @@ class _MainViewState extends State<MainView> {
       }
       debugPrint('Insert Success!');
     } else {
-      count.forEach((element) {
+      count2.forEach((element) {
         debugPrint(element.toString());
       });
     }
+    //db.rawDelete('DROP TABLE restaurants');
 
     //await db.delete('restaurants');
     var t3 = await db
@@ -330,7 +335,7 @@ class _MainViewState extends State<MainView> {
     if (t3.isEmpty) {
       debugPrint('Create restaurant table');
       await db.execute(
-          'CREATE TABLE restaurants (id INTEGER, name TEXT, min INTEGER, max INTEGER, lat REAL, long REAL)');
+          'CREATE TABLE restaurants (id INTEGER, name TEXT, min INTEGER, max INTEGER, lat REAL, long REAL, url TEXT, contact TEXT)');
     }
 
     var count3 = await db.query('restaurants');
@@ -363,7 +368,134 @@ class _MainViewState extends State<MainView> {
       }
       debugPrint('Insert Success!');
     } else {
-      count.forEach((element) {
+      count3.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
+
+    var actTable = await db
+        .rawQuery('SELECT * FROM sqlite_master WHERE name="activities"');
+    if (actTable.isEmpty) {
+      debugPrint('Created activities table!');
+      await db.execute('CREATE TABLE activities (id INTEGER, actName TEXT)');
+    }
+
+    var count4 = await db.query('activities');
+
+    if (count4.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = act.split('\n').first.split(',');
+
+      debugPrint('Columns: ${columName.toString()}');
+      act.split('\n').forEach((line) {
+        int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('activities', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count4.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
+
+    var idTable =
+        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="ids"');
+    if (idTable.isEmpty) {
+      debugPrint('Created ids table!');
+      await db.execute(
+          'CREATE TABLE ids (id INTEGER, placeId INTEGER, actId INTEGER)');
+    }
+    //await db.delete('ids');
+    var count5 = await db.query('ids');
+
+    if (count5.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = ids.split('\n').first.split(',');
+
+      debugPrint('Columns: ${columName.toString()}');
+      ids.split('\n').forEach((line) {
+        int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('ids', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count5.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
+
+    var placeNamTable =
+        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="placeName"');
+    if (placeNamTable.isEmpty) {
+      debugPrint('Created placeName table!');
+      await db.execute('CREATE TABLE placeName (id INTEGER, placeName TEXT)');
+    }
+
+    var count6 = await db.query('placeName');
+
+    if (count6.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = placeName.split('\n').first.split(',');
+
+      debugPrint('Columns: ${columName.toString()}');
+      placeName.split('\n').forEach((line) {
+        int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('placeName', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count6.forEach((element) {
         debugPrint(element.toString());
       });
     }
@@ -419,7 +551,11 @@ class _MainViewState extends State<MainView> {
             ListTile(
               title: const Text('Destinations'),
               onTap: () {
-                Navigator.pushNamed(context, '/destinationsview');
+                //Navigator.pushNamed(context, '/destinationsview');
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DestinationsView(db: db)));
               },
             ),
             ListTile(

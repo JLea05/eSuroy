@@ -20,7 +20,7 @@ class _DealsViewState extends State<DealsView> {
       fileName.replaceAll(RegExp(r'\n'), '');
 
       list.add(Container(
-        width: scrWidth * 0.50,
+        width: scrWidth * 0.7,
         margin: const EdgeInsets.fromLTRB(10, 0, 0, 10),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -60,6 +60,8 @@ class _DealsViewState extends State<DealsView> {
 
   @override
   Widget build(BuildContext context) {
+    double scrWidth = MediaQuery.of(context).size.width;
+    double scrHeight = MediaQuery.of(context).size.height;
     const TextStyle cellStyle = TextStyle(
       fontFamily: 'Times New Roman',
       fontSize: 16,
@@ -81,8 +83,15 @@ class _DealsViewState extends State<DealsView> {
                   padding: const EdgeInsets.only(top: 20, bottom: 20),
                   margin: const EdgeInsets.all(10),
                   decoration: const BoxDecoration(
-                    color: Color.fromARGB(75, 5, 177, 245),
-                    borderRadius: BorderRadius.all(Radius.circular(25)),
+                    color: Color.fromARGB(255, 255, 255, 255),
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.fromARGB(255, 57, 156, 173),
+                        spreadRadius: 3,
+                        blurRadius: 5,
+                      )
+                    ],
                   ),
                   child: Column(
                     children: [
@@ -110,11 +119,19 @@ class _DealsViewState extends State<DealsView> {
                   ),
                 ),
                 Container(
+                  height: scrHeight * 0.45,
                   padding: const EdgeInsets.only(bottom: 5, top: 10),
                   margin: const EdgeInsets.all(5),
                   decoration: const BoxDecoration(
-                    color: Color.fromARGB(75, 5, 177, 245),
-                    borderRadius: BorderRadius.all(Radius.circular(25)),
+                    color: Color.fromARGB(255, 255, 255, 255),
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.fromARGB(255, 57, 156, 173),
+                        spreadRadius: 3,
+                        blurRadius: 5,
+                      )
+                    ],
                   ),
                   child: FutureBuilder(
                       future: loadImageList(),
@@ -128,7 +145,19 @@ class _DealsViewState extends State<DealsView> {
                       })),
                 ),
                 Container(
-                  padding: const EdgeInsets.only(bottom: 5, top: 10),
+                  padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(255, 255, 255, 255),
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.fromARGB(255, 57, 156, 173),
+                        spreadRadius: 3,
+                        blurRadius: 5,
+                      )
+                    ],
+                  ),
                   child: Table(
                     columnWidths: const <int, TableColumnWidth>{
                       0: FlexColumnWidth(),
