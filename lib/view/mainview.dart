@@ -235,6 +235,7 @@ class _MainViewState extends State<MainView> {
       await db.execute(
           'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL)');
     }
+    //await db.delete('rating');
     var feedbackTable =
         await db.rawQuery('SELECT * FROM sqlite_master WHERE name="rating"');
     if (feedbackTable.isEmpty) {

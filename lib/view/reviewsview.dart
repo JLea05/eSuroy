@@ -19,19 +19,18 @@ class _ReviewsViewState extends State<ReviewsView> {
   double rating = 1.0;
   List<DropdownMenuItem> hotelList = [];
   String selected = '';
-  void dropDownList() async {
+  Future<void> dropDownList() async {
     String ret = await rootBundle.loadString('assets/text/hotelsList.txt');
-
-    setState(() {
-      ret.split(',').forEach((item) {
-        hotelList.add(DropdownMenuItem(
-          value: item,
-          child: Text(item),
-        ));
-      });
-      String selected = ret.split(',').first;
-      debugPrint('Seleced: $selected');
+    hotelList = [];
+    ret.split(',').forEach((item) {
+      hotelList.add(DropdownMenuItem(
+        value: item,
+        child: Text(item),
+      ));
     });
+    if (selected == '') {
+      selected = ret.split(',').first;
+    }
   }
 
   Future<Widget> getWidget() async {
@@ -139,6 +138,38 @@ class _ReviewsViewState extends State<ReviewsView> {
           ),
           child: Column(
             children: [
+              Container(
+                width: scrWidth * 0.7,
+                height: scrHeight * 0.25,
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  image: DecorationImage(
+                    image: AssetImage(
+                        'assets/images/hotels/${row['hotelName'].toString()}.jpg'),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+                child: Text(
+                  row['hotelName'].toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color.fromARGB(193, 255, 255, 255),
+                    fontFamily: 'Calibre',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              RatingBarIndicator(
+                rating: double.parse(row['rating'].toString()),
+                itemBuilder: (context, index) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                itemCount: 5,
+                itemSize: 50.0,
+                direction: Axis.horizontal,
+              ),
               Text(
                 'Name: ${row['name'].toString()}',
                 style: ts,
@@ -153,18 +184,8 @@ class _ReviewsViewState extends State<ReviewsView> {
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Message: ${row['message'].toString()}',
+                'Comment: ${row['message'].toString()}',
                 style: ts,
-              ),
-              RatingBarIndicator(
-                rating: double.parse(row['rating'].toString()),
-                itemBuilder: (context, index) => const Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                ),
-                itemCount: 5,
-                itemSize: 50.0,
-                direction: Axis.horizontal,
               ),
             ],
           ),
@@ -179,9 +200,7 @@ class _ReviewsViewState extends State<ReviewsView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    dropDownList();
   }
 
   @override
@@ -229,36 +248,46 @@ class _ReviewsViewState extends State<ReviewsView> {
                     fontWeight: FontWeight.normal,
                   ),
                 ),
-                Container(
-                  width: scrWidth,
-                  //height: scrHeight * 0.2,
-                  margin: const EdgeInsets.only(top: 20, bottom: 20),
-                  //padding: const EdgeInsets.only(left: 20),
-                  child: Column(
-                    children: [
-                      DropdownButton(
-                        items: hotelList,
-                        isExpanded: true,
-                        onChanged: (val) {
-                          selected = val.toString();
-                        },
-                        value: selected,
-                      ),
-                      Container(
-                        width: scrWidth,
-                        height: scrHeight * 0.4,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage(
-                                'assets/images/hotels/$selected.jpg'),
-                            fit: BoxFit.fill,
+                FutureBuilder(
+                    future: dropDownList(),
+                    builder: ((context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Container(
+                          width: scrWidth,
+                          //height: scrHeight * 0.2,
+                          margin: const EdgeInsets.only(top: 20, bottom: 20),
+                          //padding: const EdgeInsets.only(left: 20),
+                          child: Column(
+                            children: [
+                              DropdownButton(
+                                items: hotelList,
+                                isExpanded: true,
+                                onChanged: (val) {
+                                  setState(() {
+                                    selected = val.toString();
+                                  });
+                                },
+                                value: selected,
+                              ),
+                              Container(
+                                width: scrWidth,
+                                height: scrHeight * 0.4,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/images/hotels/$selected.jpg'),
+                                    fit: BoxFit.fill,
+                                  ),
+                                  border: Border.all(width: 1.2),
+                                ),
+                              ),
+                            ],
                           ),
-                          border: Border.all(width: 1.2),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                        );
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    })),
                 Container(
                   width: scrWidth * 0.8,
                   //height: scrHeight * 0.2,
@@ -307,8 +336,8 @@ class _ReviewsViewState extends State<ReviewsView> {
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                     decoration: const InputDecoration(
-                      labelText: 'Message',
-                      hintText: 'The app is good but in need of...',
+                      labelText: 'Comment',
+                      hintText: 'The accomadatio was good etc..',
                     ),
                   ),
                 ),
@@ -341,6 +370,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                           'email': ctrlEmail.text,
                           'message': ctrlMessage.text,
                           'rating': rating,
+                          'hotelName': selected,
                         };
                         widget.db.insert('rating', insertVal);
                         showDialog(
