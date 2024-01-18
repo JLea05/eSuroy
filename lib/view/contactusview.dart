@@ -18,6 +18,10 @@ class _ContactUsViewState extends State<ContactUsView> {
       fontSize: 14,
     );
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('eSuroy'),
+        foregroundColor: Colors.blue,
+      ),
       body: ListView(
         children: [
           Column(

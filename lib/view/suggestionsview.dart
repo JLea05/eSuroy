@@ -217,18 +217,14 @@ class _SuggestionsViewState extends State<SuggestionsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('eSuroy'),
+        foregroundColor: Colors.blue,
+      ),
       body: FutureBuilder(
         future: assemblyPage(context),
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return snapshot.requireData;
-          }
-          if (snapshot.hasError) {
-            debugPrint('Has Errorr');
-            return snapshot.requireData;
-          }
-          if (snapshot.hasData) {
-            debugPrint('Has data');
             return snapshot.requireData;
           }
 

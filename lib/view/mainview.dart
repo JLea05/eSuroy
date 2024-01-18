@@ -431,7 +431,7 @@ class _MainViewState extends State<MainView> {
             ListTile(
               title: const Text('Contact Us'),
               onTap: () {
-                Navigator.pushNamed(context, 'contactusview');
+                Navigator.pushNamed(context, '/contactusview');
               },
             ),
             ListTile(
