@@ -1,4 +1,5 @@
 import 'package:esuroy/view/destinationsview.dart';
+import 'package:esuroy/view/recommendationsview.dart';
 import 'package:esuroy/view/reviewsview.dart';
 import 'package:esuroy/view/suggestionsview.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +15,13 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  late String description;
   late List<Map<String, dynamic>> hotels;
-  late Database db;
-  String radioVal = 'hotel';
+  late Database db; // database
+  String radioVal = 'hotel'; // initial radio val
+  int selectedSearch = 1; // selected search for which the
   final TextEditingController min = TextEditingController(),
-      max = TextEditingController();
+      max = TextEditingController(),
+      searchCtrl = TextEditingController();
   Future<Widget> loadImageList(BuildContext context) async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
@@ -222,6 +224,8 @@ class _MainViewState extends State<MainView> {
     String act = await loadCSV(fileName: 'activities');
     String ids = await loadCSV(fileName: 'id');
     String placeName = await loadCSV(fileName: 'placeName');
+    String hotelAssoc = await loadCSV(fileName: 'hotelAssoc');
+    String restaurantAssoc = await loadCSV(fileName: 'restaurantAssoc');
     String path = join(databasesPath, 'esuroy.db');
     db = await openDatabase(path);
 
@@ -495,6 +499,96 @@ class _MainViewState extends State<MainView> {
         debugPrint(element.toString());
       });
     }
+
+    // ---------------------- hotelAssoc --------------------
+    var hotelAssocTable = await db
+        .rawQuery('SELECT * FROM sqlite_master WHERE name="hotelAssoc"');
+    if (hotelAssocTable.isEmpty) {
+      debugPrint('Created hotelAssoc table!');
+      await db.execute(
+          'CREATE TABLE hotelAssoc (id INTEGER, hotelId INTEGER, placeId INTEGER)');
+    }
+
+    var count7 = await db.query('hotelAssoc');
+
+    if (count7.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = hotelAssoc.split('\n').first.split(',');
+
+      debugPrint('Columns: ${columName.toString()}');
+      hotelAssoc.split('\n').forEach((line) {
+        int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('hotelAssoc', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count6.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
+    // --------------------- END OF HOTEL ASSOC ------------------------------
+
+    // ---------------------- RESTAURANT ASSOC -----------------------------
+    var restaurantAssocTable =
+        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="resAssoc"');
+    if (restaurantAssocTable.isEmpty) {
+      debugPrint('Created resAssoc table!');
+      await db.execute(
+          'CREATE TABLE resAssoc (id INTEGER, restaurantId INTEGER, placeId INTEGER)');
+    }
+
+    var count8 = await db.query('resAssoc');
+
+    if (count8.isEmpty) {
+      List<Map<String, dynamic>> map = [];
+      var columName = restaurantAssoc.split('\n').first.split(',');
+
+      debugPrint('Columns: ${columName.toString()}');
+      restaurantAssoc.split('\n').forEach((line) {
+        int index = 0;
+        line = line.replaceAll(RegExp(r'"'), '');
+        debugPrint('Line: $line');
+        Map<String, dynamic> l = {};
+        line.split(',').forEach((str) {
+          l[columName[index]] = str;
+          debugPrint('Content: $str');
+          debugPrint('SQL: ${columName[index]} : $str');
+
+          index++;
+        });
+        map.add(l);
+      });
+
+      map.removeAt(0);
+
+      for (var c in map) {
+        await db.insert('resAssoc', c);
+        debugPrint('INSERT: $c');
+      }
+      debugPrint('Insert Success!');
+    } else {
+      count6.forEach((element) {
+        debugPrint(element.toString());
+      });
+    }
+    // ---------------------------- END OF RESTAURANT ASSOC -----------------------
   }
 
   @override
@@ -508,6 +602,7 @@ class _MainViewState extends State<MainView> {
   void dispose() {
     min.dispose();
     max.dispose();
+    searchCtrl.dispose();
     db.close();
     super.dispose();
   }
@@ -524,7 +619,6 @@ class _MainViewState extends State<MainView> {
       ),
       drawer: Drawer(
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
             const DrawerHeader(
@@ -547,7 +641,6 @@ class _MainViewState extends State<MainView> {
             ListTile(
               title: const Text('Destinations'),
               onTap: () {
-                //Navigator.pushNamed(context, '/destinationsview');
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -597,267 +690,435 @@ class _MainViewState extends State<MainView> {
                     ),
                   ],
                 ),
-                child: const DefaultTabController(
-                  length: 2,
-                  child: TabBar(
-                    tabs: [
-                      Tab(
-                        icon: Icon(Icons.hotel),
-                      ),
-                      Tab(
-                        icon: Icon(Icons.place),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                width: scrWidth,
-                height: scrHeight * 0.55,
-                margin: const EdgeInsets.only(left: 10, right: 10),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
-                  image: DecorationImage(
-                    image: AssetImage('assets/mabua_splash.jpg'),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                  child: Column(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Container(
-                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                        child: const Text(
-                          'eSuroy',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Arial',
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-                        child: const Text(
-                          'EXPLORE THE BEAUTY\nOF SURIGAO CITY',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Arial',
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Container(
-                        width: scrWidth * 0.8,
-                        padding: const EdgeInsets.all(5),
-                        margin: const EdgeInsets.only(bottom: 20),
+                        width: scrWidth * 0.25,
+                        margin: const EdgeInsets.only(top: 5, bottom: 5),
                         decoration: BoxDecoration(
-                          border: Border.all(),
+                          color: const Color.fromARGB(255, 255, 255, 255),
                           borderRadius:
                               const BorderRadius.all(Radius.circular(10)),
-                          color: const Color.fromARGB(192, 238, 240, 242),
+                          border: Border.all(),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'Hotel',
-                              style: TextStyle(
-                                fontFamily: 'Calibre',
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromARGB(219, 18, 17, 17),
-                              ),
-                            ),
-                            Radio(
-                              value: 'hotel',
-                              groupValue: radioVal,
-                              onChanged: (value) {
-                                debugPrint('Hotel Selected!');
-                                setState(() {
-                                  radioVal = 'hotel';
-                                });
-                              },
-                            ),
-                            const Text(
-                              'Restaurant',
-                              style: TextStyle(
-                                fontFamily: 'Calibre',
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromARGB(219, 10, 10, 10),
-                              ),
-                            ),
-                            Radio(
-                              value: 'restaurant',
-                              groupValue: radioVal,
-                              onChanged: (value) {
-                                debugPrint('Restaurant Selected!');
-                                setState(() {
-                                  radioVal = 'restaurant';
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
-                        margin: const EdgeInsets.only(
-                          left: 10,
-                          right: 10,
-                        ),
-                        width: scrWidth,
-                        height: scrHeight * 0.1,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(193, 255, 255, 255),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(width: 2),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            const Text(
-                              'Budget Range: ',
-                              style: TextStyle(
-                                fontFamily: 'Arial',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            SizedBox(
-                              width: scrWidth * 0.25,
-                              height: scrHeight * 0.05,
-                              child: TextField(
-                                controller: min,
-                                textAlign: TextAlign.left,
-                                textAlignVertical: TextAlignVertical.center,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(),
-                                decoration: const InputDecoration(
-                                  hintText: '1000',
-                                  label: Text('Min'),
-                                  filled: true,
-                                  fillColor: Color.fromARGB(208, 255, 255, 255),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(45),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: scrWidth * 0.25,
-                              height: scrHeight * 0.05,
-                              child: TextField(
-                                controller: max,
-                                textAlign: TextAlign.left,
-                                textAlignVertical: TextAlignVertical.center,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(),
-                                decoration: const InputDecoration(
-                                  hintText: '3500',
-                                  label: Text('Max'),
-                                  filled: true,
-                                  fillColor: Color.fromARGB(208, 255, 255, 255),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(45),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        width: scrWidth * 0.4,
-                        height: scrHeight * 0.07,
-                        padding: const EdgeInsets.only(top: 10),
-                        child: IconButton.filled(
-                          style: const ButtonStyle(
-                            backgroundColor: MaterialStatePropertyAll(
-                              Color.fromARGB(217, 255, 255, 255),
-                            ),
-                            foregroundColor: MaterialStatePropertyAll(
-                              Color.fromARGB(141, 0, 0, 0),
-                            ),
-                            shape: MaterialStatePropertyAll(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20),
-                                ),
-                              ),
-                            ),
-                            side: MaterialStatePropertyAll(
-                              BorderSide(width: 2),
-                            ),
-                          ),
-                          onPressed: () async {
-                            debugPrint('MIN: ${min.text} MAX: ${max.text}');
-                            int minVal = int.parse(min.text);
-
-                            int maxVal = int.parse(max.text);
-
-                            var queried = await db.query(
-                                radioVal == 'hotel' ? 'hotel' : 'restaurants',
-                                distinct: true,
-                                columns: [
-                                  radioVal == 'hotel' ? 'hotelName' : 'name'
-                                ],
-                                where: 'min >= ? AND max <= ?',
-                                whereArgs: [minVal, maxVal]);
-                            debugPrint('Content Count: ${queried.length}');
-                            debugPrint(queried.toString());
-
-                            List<String> name = [];
-                            queried.forEach((val) {
-                              name.add(val.values.toList().first.toString());
+                        child: IconButton(
+                          icon: const Icon(Icons.hotel),
+                          onPressed: () {
+                            setState(() {
+                              selectedSearch = 1;
                             });
-                            debugPrint('Array: ${name.toString()}');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SuggestionsView(
-                                  hotelNames: name,
-                                  resNames: name,
-                                  db: db,
-                                  selected: radioVal == 'hotel' ? 1 : 2,
-                                ),
-                              ),
-                            );
                           },
-                          icon: const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Text(
-                                'Search',
+                          color:
+                              selectedSearch == 1 ? Colors.blue : Colors.black,
+                        ),
+                      ),
+                      Container(
+                        width: scrWidth * 0.25,
+                        margin: const EdgeInsets.only(top: 5, bottom: 5),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
+                          border: Border.all(),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.place),
+                          onPressed: () {
+                            setState(() {
+                              selectedSearch = 2;
+                            });
+                          },
+                          color:
+                              selectedSearch == 2 ? Colors.blue : Colors.black,
+                        ),
+                      ),
+                    ]),
+              ),
+              selectedSearch == 1
+                  ? Container(
+                      width: scrWidth,
+                      height: scrHeight * 0.55,
+                      margin: const EdgeInsets.only(left: 10, right: 10),
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(25)),
+                        image: DecorationImage(
+                          image: AssetImage('assets/mabua_splash.jpg'),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                              child: const Text(
+                                'eSuroy',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Color.fromARGB(192, 0, 0, 0),
+                                  color: Colors.white,
                                   fontFamily: 'Arial',
-                                  fontSize: 18,
+                                  fontSize: 36,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Icon(
-                                Icons.search,
-                                size: 24,
+                            ),
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+                              child: const Text(
+                                'EXPLORE THE BEAUTY\nOF SURIGAO CITY',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Arial',
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
                               ),
-                            ],
-                          ),
+                            ),
+                            Container(
+                              width: scrWidth * 0.8,
+                              padding: const EdgeInsets.all(5),
+                              margin: const EdgeInsets.only(bottom: 20),
+                              decoration: BoxDecoration(
+                                border: Border.all(),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                                color: const Color.fromARGB(192, 238, 240, 242),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    'Hotel',
+                                    style: TextStyle(
+                                      fontFamily: 'Calibre',
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(219, 18, 17, 17),
+                                    ),
+                                  ),
+                                  Radio(
+                                    value: 'hotel',
+                                    groupValue: radioVal,
+                                    onChanged: (value) {
+                                      debugPrint('Hotel Selected!');
+                                      setState(() {
+                                        radioVal = 'hotel';
+                                      });
+                                    },
+                                  ),
+                                  const Text(
+                                    'Restaurant',
+                                    style: TextStyle(
+                                      fontFamily: 'Calibre',
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(219, 10, 10, 10),
+                                    ),
+                                  ),
+                                  Radio(
+                                    value: 'restaurant',
+                                    groupValue: radioVal,
+                                    onChanged: (value) {
+                                      debugPrint('Restaurant Selected!');
+                                      setState(() {
+                                        radioVal = 'restaurant';
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(10, 20, 10, 20),
+                              margin: const EdgeInsets.only(
+                                left: 10,
+                                right: 10,
+                              ),
+                              width: scrWidth,
+                              height: scrHeight * 0.1,
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(193, 255, 255, 255),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(width: 2),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  const Text(
+                                    'Budget Range: ',
+                                    style: TextStyle(
+                                      fontFamily: 'Arial',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: scrWidth * 0.25,
+                                    height: scrHeight * 0.05,
+                                    child: TextField(
+                                      controller: min,
+                                      textAlign: TextAlign.left,
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
+                                      keyboardType: const TextInputType
+                                          .numberWithOptions(),
+                                      decoration: const InputDecoration(
+                                        hintText: '1000',
+                                        label: Text('Min'),
+                                        filled: true,
+                                        fillColor:
+                                            Color.fromARGB(208, 255, 255, 255),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(45),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: scrWidth * 0.25,
+                                    height: scrHeight * 0.05,
+                                    child: TextField(
+                                      controller: max,
+                                      textAlign: TextAlign.left,
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
+                                      keyboardType: const TextInputType
+                                          .numberWithOptions(),
+                                      decoration: const InputDecoration(
+                                        hintText: '3500',
+                                        label: Text('Max'),
+                                        filled: true,
+                                        fillColor:
+                                            Color.fromARGB(208, 255, 255, 255),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(45),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: scrWidth * 0.4,
+                              height: scrHeight * 0.07,
+                              padding: const EdgeInsets.only(top: 10),
+                              child: IconButton.filled(
+                                style: const ButtonStyle(
+                                  backgroundColor: MaterialStatePropertyAll(
+                                    Color.fromARGB(217, 255, 255, 255),
+                                  ),
+                                  foregroundColor: MaterialStatePropertyAll(
+                                    Color.fromARGB(141, 0, 0, 0),
+                                  ),
+                                  shape: MaterialStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                  side: MaterialStatePropertyAll(
+                                    BorderSide(width: 2),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  debugPrint(
+                                      'MIN: ${min.text} MAX: ${max.text}');
+                                  int minVal = int.parse(min.text);
+
+                                  int maxVal = int.parse(max.text);
+
+                                  var queried = await db.query(
+                                      radioVal == 'hotel'
+                                          ? 'hotel'
+                                          : 'restaurants',
+                                      distinct: true,
+                                      columns: [
+                                        radioVal == 'hotel'
+                                            ? 'hotelName'
+                                            : 'name'
+                                      ],
+                                      where:
+                                          'min >= ? AND (max <= ? AND max >= ?)',
+                                      whereArgs: [minVal, maxVal, minVal]);
+                                  debugPrint(
+                                      'Content Count: ${queried.length}');
+                                  debugPrint(queried.toString());
+
+                                  List<String> name = [];
+                                  queried.forEach((val) {
+                                    name.add(
+                                        val.values.toList().first.toString());
+                                  });
+                                  debugPrint('Array: ${name.toString()}');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SuggestionsView(
+                                        hotelNames: name,
+                                        resNames: name,
+                                        db: db,
+                                        selected: radioVal == 'hotel' ? 1 : 2,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(
+                                      'Search',
+                                      style: TextStyle(
+                                        color: Color.fromARGB(192, 0, 0, 0),
+                                        fontFamily: 'Arial',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.search,
+                                      size: 24,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    )
+                  : Container(
+                      width: scrWidth,
+                      height: scrHeight * 0.55,
+                      margin: const EdgeInsets.only(left: 10, right: 10),
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(25)),
+                        image: DecorationImage(
+                          image: AssetImage('assets/mabua_splash.jpg'),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                              child: const Text(
+                                'eSuroy',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Arial',
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+                              child: const Text(
+                                'EXPLORE THE BEAUTY\nOF SURIGAO CITY',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Arial',
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            SizedBox(
+                              width: scrWidth * 0.65,
+                              height: scrHeight * 0.075,
+                              child: TextField(
+                                controller: searchCtrl,
+                                textAlign: TextAlign.left,
+                                textAlignVertical: TextAlignVertical.center,
+                                keyboardType: TextInputType.name,
+                                decoration: const InputDecoration(
+                                  hintText: 'Mabua',
+                                  labelText: 'Place',
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  filled: true,
+                                  fillColor: Color.fromARGB(208, 255, 255, 255),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: scrWidth * 0.35,
+                              padding: const EdgeInsets.only(top: 20),
+                              child: IconButton.filled(
+                                style: const ButtonStyle(
+                                  backgroundColor: MaterialStatePropertyAll(
+                                    Color.fromARGB(217, 255, 255, 255),
+                                  ),
+                                  foregroundColor: MaterialStatePropertyAll(
+                                    Color.fromARGB(141, 0, 0, 0),
+                                  ),
+                                  shape: MaterialStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                  side: MaterialStatePropertyAll(
+                                    BorderSide(width: 2),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RecommendationsView(
+                                        placeName: searchCtrl.text,
+                                        db: db,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(
+                                      'Search',
+                                      style: TextStyle(
+                                        color: Color.fromARGB(192, 0, 0, 0),
+                                        fontFamily: 'Arial',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.search,
+                                      size: 24,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
               Container(
                 padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
                 margin: const EdgeInsets.fromLTRB(10, 30, 10, 10),
@@ -903,14 +1164,15 @@ class _MainViewState extends State<MainView> {
           Container(
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
             child: FutureBuilder(
-                future: loadDescription(),
-                builder: ((context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return snapshot.requireData;
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                })),
+              future: loadDescription(),
+              builder: ((context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return snapshot.requireData;
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              }),
+            ),
           ),
           FutureBuilder(
               future: loadExtra(),
