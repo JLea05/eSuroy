@@ -60,7 +60,6 @@ class _DealsViewState extends State<DealsView> {
 
   @override
   Widget build(BuildContext context) {
-    double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
     const TextStyle cellStyle = TextStyle(
       fontFamily: 'Times New Roman',

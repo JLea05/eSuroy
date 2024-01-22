@@ -1,10 +1,8 @@
 import 'package:esuroy/view/aboutusview.dart';
 import 'package:esuroy/view/contactusview.dart';
 import 'package:esuroy/view/dealsview.dart';
-import 'package:esuroy/view/destinationsview.dart';
 import 'package:flutter/material.dart';
 import 'package:esuroy/view/mainview.dart';
-import 'package:sqflite/sqflite.dart';
 
 void main() {
   runApp(const MyApp());

@@ -62,7 +62,6 @@ class _SuggestionsViewState extends State<SuggestionsView> {
     } else {
       if (widget.selected == 1) {
         for (var name in widget.hotelNames) {
-          int min = 0, max = 0;
           debugPrint(name);
           var q = await widget.db.query('hotel',
               distinct: true,

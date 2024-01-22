@@ -1,7 +1,3 @@
-import 'dart:ffi';
-
-import 'package:esuroy/view/aboutusview.dart';
-import 'package:esuroy/view/contactusview.dart';
 import 'package:esuroy/view/destinationsview.dart';
 import 'package:esuroy/view/reviewsview.dart';
 import 'package:esuroy/view/suggestionsview.dart';
@@ -588,6 +584,35 @@ class _MainViewState extends State<MainView> {
             children: [
               Container(
                 width: scrWidth,
+                height: scrHeight * 0.07,
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(255, 255, 255, 255),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(255, 57, 156, 173),
+                      spreadRadius: 1,
+                      blurRadius: 1,
+                    ),
+                  ],
+                ),
+                child: const DefaultTabController(
+                  length: 2,
+                  child: TabBar(
+                    tabs: [
+                      Tab(
+                        icon: Icon(Icons.hotel),
+                      ),
+                      Tab(
+                        icon: Icon(Icons.place),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                width: scrWidth,
                 height: scrHeight * 0.55,
                 margin: const EdgeInsets.only(left: 10, right: 10),
                 decoration: const BoxDecoration(
@@ -697,10 +722,10 @@ class _MainViewState extends State<MainView> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             const Text(
-                              'Price Range: ',
+                              'Budget Range: ',
                               style: TextStyle(
                                 fontFamily: 'Arial',
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),

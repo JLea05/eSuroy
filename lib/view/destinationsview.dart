@@ -279,8 +279,6 @@ class _DestinationsViewState extends State<DestinationsView> {
 
   @override
   Widget build(BuildContext context) {
-    double scrWidth = MediaQuery.of(context).size.width;
-    double scrHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text('eSuroy'),
