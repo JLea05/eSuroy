@@ -1,3 +1,4 @@
+import 'package:esuroy/util/Util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
@@ -14,6 +15,7 @@ class DestinationsView extends StatefulWidget {
 class _DestinationsViewState extends State<DestinationsView> {
   Future<List<String>> getActNames(String fileName) async {
     List<String> actNames = [];
+
     var queried = await widget.db.query('placeName',
         columns: ['id'], where: 'placeName LIKE ?', whereArgs: ['%$fileName%']);
     var actIds = await widget.db.query(
@@ -23,15 +25,6 @@ class _DestinationsViewState extends State<DestinationsView> {
       whereArgs: [queried.first['id'].toString()],
     );
     for (var actID in actIds) {
-      /*widget.db
-          .query('activities',
-              columns: ['actName'],
-              where: 'id = ?',
-              whereArgs: [actID['actId'].toString()])
-          .then((actName) {
-        actNames.add(actName.first['actName'].toString());
-        debugPrint('Adding data to actnames');
-      });*/
       var actName = await widget.db.query('activities',
           columns: ['actName'],
           where: 'id = ?',
@@ -40,47 +33,34 @@ class _DestinationsViewState extends State<DestinationsView> {
     }
 
     return actNames;
-    /*widget.db
-        .query('placeName',
-            columns: ['id'],
-            where: 'placeName LIKE ?',
-            whereArgs: ['%$fileName%'])
-        .then(
-      (queried) {
-        widget.db
-            .query(
-          'ids',
-          columns: ['actId'],
-          where: 'placeId = ?',
-          whereArgs: [queried.first['id'].toString()],
-        )
-            .then(
-          (actIds) {
-            List<String> actNames = [];
-            for (var actID in actIds) {
-              widget.db
-                  .query('activities',
-                      columns: ['actName'],
-                      where: 'id = ?',
-                      whereArgs: [actID['actId'].toString()])
-                  .then((actName) {
-                actNames.add(actName.first['actName'].toString());
-                debugPrint('Adding data to actnames');
-              });
-            }
-          },
-        );
-      },
-    );*/
   }
 
   Future<Widget> loadImageList() async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
-    String ret = await rootBundle.loadString('assets/text/PlacesList.txt');
+    if (Utility.db == null) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        width: scrWidth,
+        height: scrHeight * 0.30,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: const [Text('Loading...')],
+        ),
+      );
+    }
+
     List<Widget> list = [];
 
-    ret.split(',').forEach((fileName) {
+    var query = await Utility.db!.query('placeName', columns: ['placeName']);
+    int index = 0;
+    for (var col in query) {
+      String str = col['placeName'].toString();
+      if (index != query.length - 1) {
+        str = str.substring(0, str.length - 1);
+      }
+
+      index++;
       list.add(
         Container(
           width: scrWidth * 0.50,
@@ -88,7 +68,7 @@ class _DestinationsViewState extends State<DestinationsView> {
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(15)),
             image: DecorationImage(
-              image: AssetImage('assets/ImageList/$fileName.jpg'),
+              image: AssetImage('assets/ImageList/$str.jpg'),
               fit: BoxFit.fill,
             ),
           ),
@@ -98,11 +78,11 @@ class _DestinationsViewState extends State<DestinationsView> {
               color: Color.fromARGB(0, 255, 255, 255),
             ),
             onPressed: () {
-              getActNames(fileName).then(
+              getActNames(str).then(
                 (actNames) {
                   List<Widget> wid = [];
                   wid.add(Text(
-                    fileName,
+                    str,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontFamily: 'Calibre',
@@ -143,6 +123,7 @@ class _DestinationsViewState extends State<DestinationsView> {
                   showDialog(
                       context: context,
                       builder: (BuildContext context) {
+                        debugPrint('act Names count: ${wid.length}');
                         return SimpleDialog(
                           title: const Text(
                             'Descriptions',
@@ -161,7 +142,7 @@ class _DestinationsViewState extends State<DestinationsView> {
           ),
         ),
       );
-    });
+    }
 
     return Container(
       padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -178,7 +159,7 @@ class _DestinationsViewState extends State<DestinationsView> {
         ],
       ),
       width: scrWidth * 0.9,
-      height: scrHeight * 0.2,
+      height: scrHeight * 0.3,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: list,
@@ -195,64 +176,75 @@ class _DestinationsViewState extends State<DestinationsView> {
   Future<Widget> loadImages({required String listName}) async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
-    String ret = await rootBundle.loadString('assets/text/${listName}List.txt');
     List<Widget> list = [];
 
-    ret.split(',').forEach((fileName) {
-      list.add(Container(
-        width: scrWidth * 0.50,
-        margin: const EdgeInsets.fromLTRB(10, 0, 0, 20),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(15)),
-          image: DecorationImage(
-            image: AssetImage('assets/images/$listName/$fileName.jpg'),
-            fit: BoxFit.fill,
+    var queried = await widget.db.query(
+        listName == 'hotels' ? 'hotel' : 'restaurants',
+        columns: listName == 'hotels' ? ['hotelName'] : ['name']);
+    debugPrint('type $listName');
+    debugPrint('length: ${queried.length}');
+
+    for (var i = 0; i < queried.length; i++) {
+      final row = queried[i];
+      String fileName =
+          row[listName == 'hotels' ? 'hotelName' : 'name'].toString();
+
+      if (fileName != 'null') {
+        list.add(Container(
+          width: scrWidth * 0.50,
+          margin: const EdgeInsets.fromLTRB(10, 0, 0, 20),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(15)),
+            image: DecorationImage(
+              image: AssetImage('assets/images/$listName/$fileName.jpg'),
+              fit: BoxFit.fill,
+            ),
           ),
-        ),
-        child: IconButton(
-          icon: const Icon(
-            Icons.image_rounded,
-            color: Color.fromARGB(0, 255, 255, 255),
+          child: IconButton(
+            icon: const Icon(
+              Icons.image_rounded,
+              color: Color.fromARGB(0, 255, 255, 255),
+            ),
+            onPressed: () {
+              widget.db
+                  .query(listName == 'restaurants' ? 'restaurants' : 'hotel',
+                      columns: ['url', 'contact'],
+                      where: listName == 'restaurants'
+                          ? 'name = ?'
+                          : 'hotelName = ?',
+                      whereArgs: [fileName])
+                  .then(
+                (queried) {
+                  debugPrint('Pressed $fileName');
+                  final Uri _uri = Uri.parse(queried.first['url'].toString());
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SimpleDialog(
+                          title: const Text('Descriptions'),
+                          children: [
+                            Text(fileName),
+                            Text(
+                                'Contact Info: ${queried.first['contact'].toString()}'),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (queried.first['url'].toString() !=
+                                    'unavailable') {
+                                  await launchUrlText(_uri);
+                                }
+                              },
+                              child: Text(queried.first['url'].toString()),
+                            ),
+                          ],
+                        );
+                      });
+                },
+              );
+            },
           ),
-          onPressed: () {
-            widget.db
-                .query(listName == 'restaurants' ? 'restaurants' : 'hotel',
-                    columns: ['url', 'contact'],
-                    where: listName == 'restaurants'
-                        ? 'name = ?'
-                        : 'hotelName = ?',
-                    whereArgs: [fileName])
-                .then(
-              (queried) {
-                debugPrint('Pressed $fileName');
-                final Uri _uri = Uri.parse(queried.first['url'].toString());
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SimpleDialog(
-                        title: const Text('Descriptions'),
-                        children: [
-                          Text(fileName),
-                          Text(
-                              'Contact Info: ${queried.first['contact'].toString()}'),
-                          ElevatedButton(
-                            onPressed: () async {
-                              if (queried.first['url'].toString() !=
-                                  'unavailable') {
-                                await launchUrlText(_uri);
-                              }
-                            },
-                            child: Text(queried.first['url'].toString()),
-                          ),
-                        ],
-                      );
-                    });
-              },
-            );
-          },
-        ),
-      ));
-    });
+        ));
+      }
+    }
 
     return Container(
       padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -269,7 +261,7 @@ class _DestinationsViewState extends State<DestinationsView> {
         ],
       ),
       width: scrWidth * 0.9,
-      height: scrHeight * 0.2,
+      height: scrHeight * 0.3,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: list,

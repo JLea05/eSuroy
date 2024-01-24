@@ -20,16 +20,19 @@ class _ReviewsViewState extends State<ReviewsView> {
   List<DropdownMenuItem> hotelList = [];
   String selected = '';
   Future<void> dropDownList() async {
-    String ret = await rootBundle.loadString('assets/text/hotelsList.txt');
+    var queried = await widget.db.query('hotel', columns: ['hotelName']);
     hotelList = [];
-    ret.split(',').forEach((item) {
+
+    for (var i = 0; i < queried.length; i++) {
+      final row = queried[i]['hotelName'].toString();
       hotelList.add(DropdownMenuItem(
-        value: item,
-        child: Text(item),
+        value: row,
+        child: Text(row),
       ));
-    });
+    }
+
     if (selected == '') {
-      selected = ret.split(',').first;
+      selected = queried.first['hotelName'].toString();
     }
   }
 

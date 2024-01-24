@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:esuroy/util/Util.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -15,8 +16,7 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  late List<Map<String, dynamic>> hotels;
-  late Database db; // database
+  Database? db; // database
   String radioVal = 'hotel'; // initial radio val
   int selectedSearch = 1; // selected search for which the
   final TextEditingController min = TextEditingController(),
@@ -25,10 +25,30 @@ class _MainViewState extends State<MainView> {
   Future<Widget> loadImageList(BuildContext context) async {
     double scrWidth = MediaQuery.of(context).size.width;
     double scrHeight = MediaQuery.of(context).size.height;
-    String ret = await rootBundle.loadString('assets/text/PlacesList.txt');
+    if (db == null) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        width: scrWidth,
+        height: scrHeight * 0.30,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: const [Text('Loading...')],
+        ),
+      );
+    }
+
     List<Widget> list = [];
 
-    ret.split(',').forEach((fileName) {
+    var query = await db!.query('placeName', columns: ['placeName']);
+    int index = 0;
+    for (var col in query) {
+      String str = col['placeName'].toString();
+      if (index != query.length - 1) {
+        str = str.substring(0, str.length - 1);
+      }
+
+      str += '.jpg';
+      index++;
       list.add(Container(
         width: scrWidth * 0.5,
         height: scrHeight * 0.15,
@@ -36,7 +56,7 @@ class _MainViewState extends State<MainView> {
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
           image: DecorationImage(
-            image: AssetImage('assets/ImageList/$fileName.jpg'),
+            image: AssetImage('assets/ImageList/$str'),
             fit: BoxFit.fill,
           ),
         ),
@@ -51,7 +71,7 @@ class _MainViewState extends State<MainView> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  fileName,
+                  col['placeName'].toString(),
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -62,7 +82,7 @@ class _MainViewState extends State<MainView> {
           ],
         ),
       ));
-    });
+    }
 
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -216,386 +236,15 @@ class _MainViewState extends State<MainView> {
     );
   }
 
-  void initSQL() async {
-    var databasesPath = await getDatabasesPath();
-    String hot = await loadCSV(fileName: 'hotel');
-    String deals = await loadCSV(fileName: 'deals');
-    String res = await loadCSV(fileName: 'restaurant');
-    String act = await loadCSV(fileName: 'activities');
-    String ids = await loadCSV(fileName: 'id');
-    String placeName = await loadCSV(fileName: 'placeName');
-    String hotelAssoc = await loadCSV(fileName: 'hotelAssoc');
-    String restaurantAssoc = await loadCSV(fileName: 'restaurantAssoc');
-    String path = join(databasesPath, 'esuroy.db');
-    db = await openDatabase(path);
-
-    //db.rawDelete('DROP TABLE hotel');
-    //db.rawDelete('DROP TABLE rating');
-    var exist =
-        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="hotel"');
-
-    if (exist.isEmpty) {
-      debugPrint('Created Table hotel!');
-      await db.execute(
-          'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL, url TEXT, contact TEXT)');
-    }
-    //await db.delete('rating');
-    var feedbackTable =
-        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="rating"');
-    if (feedbackTable.isEmpty) {
-      debugPrint('Created rating table!');
-      await db.execute(
-          'CREATE TABLE rating (name TEXT, phone TEXT, email TEXT, message TEXT, rating REAL, hotelName TEXT)');
-    }
-
-    //await db.delete('deals');
-    //await db.delete('hotel');
-    var count = await db.query('hotel');
-
-    if (count.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = hot.split('\n').first.split(',');
-
-      hot.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : ${str.toString()}');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-      hotels = map;
-      for (var c in map) {
-        await db.insert('hotel', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-
-    var t2 =
-        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="deals"');
-
-    if (t2.isEmpty) {
-      await db.execute(
-          'CREATE TABLE deals (id_deals INTEGER, id_hotels INTEGER, id_res INTEGER, id_acts INTEGER, id_place INTEGER)');
-    }
-
-    var count2 = await db.query('deals');
-
-    if (count2.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = deals.split('\n').first.split(',');
-
-      deals.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-
-      for (var c in map) {
-        await db.insert('deals', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count2.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-    //db.rawDelete('DROP TABLE restaurants');
-
-    //await db.delete('restaurants');
-    var t3 = await db
-        .rawQuery('SELECT * FROM sqlite_master WHERE name="restaurants"');
-
-    if (t3.isEmpty) {
-      debugPrint('Create restaurant table');
-      await db.execute(
-          'CREATE TABLE restaurants (id INTEGER, name TEXT, min INTEGER, max INTEGER, lat REAL, long REAL, url TEXT, contact TEXT)');
-    }
-
-    var count3 = await db.query('restaurants');
-
-    if (count3.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = res.split('\n').first.split(',');
-
-      debugPrint('Columns: ${columName.toString()}');
-      res.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-
-      for (var c in map) {
-        await db.insert('restaurants', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count3.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-
-    var actTable = await db
-        .rawQuery('SELECT * FROM sqlite_master WHERE name="activities"');
-    if (actTable.isEmpty) {
-      debugPrint('Created activities table!');
-      await db.execute('CREATE TABLE activities (id INTEGER, actName TEXT)');
-    }
-
-    var count4 = await db.query('activities');
-
-    if (count4.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = act.split('\n').first.split(',');
-
-      debugPrint('Columns: ${columName.toString()}');
-      act.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-
-      for (var c in map) {
-        await db.insert('activities', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count4.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-
-    var idTable =
-        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="ids"');
-    if (idTable.isEmpty) {
-      debugPrint('Created ids table!');
-      await db.execute(
-          'CREATE TABLE ids (id INTEGER, placeId INTEGER, actId INTEGER)');
-    }
-    //await db.delete('ids');
-    var count5 = await db.query('ids');
-
-    if (count5.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = ids.split('\n').first.split(',');
-
-      debugPrint('Columns: ${columName.toString()}');
-      ids.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-
-      for (var c in map) {
-        await db.insert('ids', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count5.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-
-    var placeNamTable =
-        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="placeName"');
-    if (placeNamTable.isEmpty) {
-      debugPrint('Created placeName table!');
-      await db.execute('CREATE TABLE placeName (id INTEGER, placeName TEXT)');
-    }
-
-    var count6 = await db.query('placeName');
-
-    if (count6.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = placeName.split('\n').first.split(',');
-
-      debugPrint('Columns: ${columName.toString()}');
-      placeName.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-
-      for (var c in map) {
-        await db.insert('placeName', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count6.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-
-    // ---------------------- hotelAssoc --------------------
-    var hotelAssocTable = await db
-        .rawQuery('SELECT * FROM sqlite_master WHERE name="hotelAssoc"');
-    if (hotelAssocTable.isEmpty) {
-      debugPrint('Created hotelAssoc table!');
-      await db.execute(
-          'CREATE TABLE hotelAssoc (id INTEGER, hotelId INTEGER, placeId INTEGER)');
-    }
-
-    var count7 = await db.query('hotelAssoc');
-
-    if (count7.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = hotelAssoc.split('\n').first.split(',');
-
-      debugPrint('Columns: ${columName.toString()}');
-      hotelAssoc.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-
-      for (var c in map) {
-        await db.insert('hotelAssoc', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count6.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-    // --------------------- END OF HOTEL ASSOC ------------------------------
-
-    // ---------------------- RESTAURANT ASSOC -----------------------------
-    var restaurantAssocTable =
-        await db.rawQuery('SELECT * FROM sqlite_master WHERE name="resAssoc"');
-    if (restaurantAssocTable.isEmpty) {
-      debugPrint('Created resAssoc table!');
-      await db.execute(
-          'CREATE TABLE resAssoc (id INTEGER, restaurantId INTEGER, placeId INTEGER)');
-    }
-
-    var count8 = await db.query('resAssoc');
-
-    if (count8.isEmpty) {
-      List<Map<String, dynamic>> map = [];
-      var columName = restaurantAssoc.split('\n').first.split(',');
-
-      debugPrint('Columns: ${columName.toString()}');
-      restaurantAssoc.split('\n').forEach((line) {
-        int index = 0;
-        line = line.replaceAll(RegExp(r'"'), '');
-        debugPrint('Line: $line');
-        Map<String, dynamic> l = {};
-        line.split(',').forEach((str) {
-          l[columName[index]] = str;
-          debugPrint('Content: $str');
-          debugPrint('SQL: ${columName[index]} : $str');
-
-          index++;
-        });
-        map.add(l);
-      });
-
-      map.removeAt(0);
-
-      for (var c in map) {
-        await db.insert('resAssoc', c);
-        debugPrint('INSERT: $c');
-      }
-      debugPrint('Insert Success!');
-    } else {
-      count6.forEach((element) {
-        debugPrint(element.toString());
-      });
-    }
-    // ---------------------------- END OF RESTAURANT ASSOC -----------------------
+  void initDatabaseInfo() async {
+    db = await Utility.initDatabase();
+    Utility.initTables().then((value) => {setState(() {})});
   }
 
   @override
   void initState() {
     super.initState();
-
-    initSQL();
+    initDatabaseInfo();
   }
 
   @override
@@ -603,7 +252,7 @@ class _MainViewState extends State<MainView> {
     min.dispose();
     max.dispose();
     searchCtrl.dispose();
-    db.close();
+    db!.close();
     super.dispose();
   }
 
@@ -644,7 +293,7 @@ class _MainViewState extends State<MainView> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => DestinationsView(db: db)));
+                        builder: (context) => DestinationsView(db: db!)));
               },
             ),
             ListTile(
@@ -665,7 +314,7 @@ class _MainViewState extends State<MainView> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ReviewsView(db: db)));
+                        builder: (context) => ReviewsView(db: db!)));
               },
             ),
           ],
@@ -938,7 +587,7 @@ class _MainViewState extends State<MainView> {
 
                                   int maxVal = int.parse(max.text);
 
-                                  var queried = await db.query(
+                                  var queried = await db!.query(
                                       radioVal == 'hotel'
                                           ? 'hotel'
                                           : 'restaurants',
@@ -948,12 +597,11 @@ class _MainViewState extends State<MainView> {
                                             ? 'hotelName'
                                             : 'name'
                                       ],
-                                      where:
-                                          'min >= ? AND (max <= ? AND max >= ?)',
-                                      whereArgs: [minVal, maxVal, minVal]);
+                                      where: '(max <= ? AND max >= ?)',
+                                      whereArgs: [maxVal, minVal]);
                                   debugPrint(
                                       'Content Count: ${queried.length}');
-                                  debugPrint(queried.toString());
+                                  debugPrint('Content: ${queried.toString()}');
 
                                   List<String> name = [];
                                   queried.forEach((val) {
@@ -967,7 +615,7 @@ class _MainViewState extends State<MainView> {
                                       builder: (context) => SuggestionsView(
                                         hotelNames: name,
                                         resNames: name,
-                                        db: db,
+                                        db: db!,
                                         selected: radioVal == 'hotel' ? 1 : 2,
                                       ),
                                     ),
@@ -1089,7 +737,7 @@ class _MainViewState extends State<MainView> {
                                     MaterialPageRoute(
                                       builder: (context) => RecommendationsView(
                                         placeName: searchCtrl.text,
-                                        db: db,
+                                        db: db!,
                                       ),
                                     ),
                                   );

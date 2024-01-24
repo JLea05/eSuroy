@@ -1,0 +1,8 @@
+CREATE TABLE activities (id INTEGER, actName TEXT)
+CREATE TABLE deals (id_deals INTEGER, id_hotels INTEGER, id_res INTEGER, id_acts INTEGER, id_place INTEGER)
+CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL, url TEXT, contact TEXT)
+CREATE TABLE hotelAssoc (id INTEGER, hotelId INTEGER, placeId INTEGER)
+CREATE TABLE ids (id INTEGER, placeId INTEGER, actId INTEGER)
+CREATE TABLE placeName (id INTEGER, placeName TEXT)
+CREATE TABLE restaurants (id INTEGER, name TEXT, min INTEGER, max INTEGER, lat REAL, long REAL, url TEXT, contact TEXT)
+CREATE TABLE resAssoc (id INTEGER, restaurantId INTEGER, placeId INTEGER)
