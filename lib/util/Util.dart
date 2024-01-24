@@ -42,33 +42,33 @@ class Utility {
     for (var i = 0; i < fileNames.length; i++) {
       final csvName = fileNames[i];
       final tableName = tableNames[i];
+      await _createTable(index: i, tablename: tableName);
       await _initTable(csvfilename: csvName, tablename: tableName);
+    }
+  }
+
+  static Future<void> _createTable(
+      {required int index, required String tablename}) async {
+    String schema = await rootBundle.loadString('assets/text/schema.txt');
+    final parsed = schema.split('\n');
+    var exist = await db!
+        .rawQuery('SELECT * FROM sqlite_master WHERE name="$tablename"');
+
+    if (exist.isEmpty) {
+      debugPrint('Created Table $tablename!');
+      await db!.execute(parsed[index]);
     }
   }
 
   static Future<void> _initTable(
       {required String tablename, required String csvfilename}) async {
     String parse = await rootBundle.loadString('assets/csv/$csvfilename.csv');
-    var exist =
-        await db!.rawQuery('SELECT * FROM sqlite_master WHERE name="hotel"');
 
-    if (exist.isEmpty) {
-      debugPrint('Created Table hotel!');
-      await db!.execute(
-          'CREATE TABLE hotel (id_hotel INTEGER, hotelName TEXT, min INTEGER, max INTEGER, lat REAL, long REAL, url TEXT, contact TEXT)');
-    }
     //await db.delete('rating');
-    var feedbackTable =
-        await db!.rawQuery('SELECT * FROM sqlite_master WHERE name="rating"');
-    if (feedbackTable.isEmpty) {
-      debugPrint('Created rating table!');
-      await db!.execute(
-          'CREATE TABLE rating (name TEXT, phone TEXT, email TEXT, message TEXT, rating REAL, hotelName TEXT)');
-    }
 
     //await db.delete('deals');
     //await db.delete('hotel');
-    var count = await db!.query('hotel');
+    var count = await db!.query(tablename);
 
     if (count.isEmpty) {
       List<Map<String, dynamic>> map = [];
@@ -92,7 +92,7 @@ class Utility {
 
       map.removeAt(0);
       for (var c in map) {
-        await db!.insert('hotel', c);
+        await db!.insert(tablename, c);
         debugPrint('INSERT: $c');
       }
       debugPrint('Insert Success!');
