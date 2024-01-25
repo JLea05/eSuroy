@@ -1,13 +1,14 @@
 id,name,min,max,lat,long,url,contact
-1,Buzy Bistro,100,200,9.799867,125.4376583,https://www.facebook.com/thebuzybistro/menu/,6.39298E+11
-2,Beachcomber Bar and Grill,100,300,9.817151,125.45259,http://www.beachcomber.ph/,6.39085E+11
+1,Buzy Bistro,100,200,9.799867,125.4376583,unavailable,+639298172685
+2,Beachcomber Bar and Grill,100,300,9.817151,125.45259,http://www.beachcomber.ph/,+639085362287
 3,EJ Garden by the Bay,200,500,9.785369,125.500019,https://www.facebook.com/ejscafesurigao/,+63985 823 4803
 4,Daplin Sizzling House And Coffee,90,200,9.792004,125.483023,https://www.facebook.com/daplin.sc/,+63917 150 6616
 5,Jollibee,100,500,9.790092,125.492943,https://www.facebook.com/JBSurigaoMain/,+63920 610 8316
-6,Multi-Stye Food Court Metro Surigao,80,300,9.790092,125.492943,https://www.facebook.com/LaIslaResortSUG/?_rdc=1&_rdr,862316726
-7,TEAsty Avenue,50,100,9.77017,125.535079,http://www.facebook.com/teastyavenue,6.3948E+11
+6,Multi-Stye Food Court Metro Surigao,80,300,9.790092,125.492943,unavailable,862316726
+7,TEAsty Avenue,50,100,9.77017,125.535079,http://www.facebook.com/teastyavenue,+639479907586
 8,McDonald's Surigao,79,680,9.788645,125.492514,https://www.facebook.com/McDonaldsSurigao/,(086) 231 6236
 9,PV Grill House,150,530,9.7866127,125.4996,https://www.facebook.com/pvsurigao/,+639194555855
 10,Café Ethereal,129,350,9.784617,125.4997,https://www.facebook.com/CafeEthereal.ph/,Cafeethereal2021@gmail.com
 11,Chowking Surigao,88,838,9.789856,125.4929,https://www.facebook.com/chowkingsurigao/,+63948 584 5637
 12,Mario's Garden Grill and Restaurant,60,899,9.7912504,125.493929,https://www.facebook.com/mariosrestobarofficialpage/,(086) 826 9343
+13,Cafe Marga,60,270,9.5652894,125.569,https://www.facebook.com/cafemarga/,cafemargamgmt@gmail.com

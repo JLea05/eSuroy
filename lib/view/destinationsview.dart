@@ -53,6 +53,7 @@ class _DestinationsViewState extends State<DestinationsView> {
     List<Widget> list = [];
 
     var query = await Utility.db!.query('placeName', columns: ['placeName']);
+    debugPrint('Count: ${query.length}');
     int index = 0;
     for (var col in query) {
       String str = col['placeName'].toString();
