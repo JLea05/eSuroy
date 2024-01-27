@@ -23,13 +23,30 @@ class _DestinationsViewState extends State<DestinationsView> {
       columns: ['actId'],
       where: 'placeId = ?',
       whereArgs: [queried.first['id'].toString()],
+      distinct: true,
     );
+    debugPrint('Queried ids: ${actIds.length}');
     for (var actID in actIds) {
-      var actName = await widget.db.query('activities',
-          columns: ['actName'],
-          where: 'id = ?',
-          whereArgs: [actID['actId'].toString()]);
+      var actName = await widget.db.query(
+        'activities',
+        columns: ['actName'],
+        where: 'id = ?',
+        whereArgs: [actID['actId'].toString()],
+        distinct: true,
+      );
       actNames.add(actName.first['actName'].toString());
+      debugPrint(
+          'PlaceID: ${queried.first['id'].toString()} | actID: ${actID['actId'].toString()}');
+    }
+
+    var debugQuery = await widget.db.query(
+      'ids',
+    );
+
+    debugPrint('-------------------------');
+    for (var d in debugQuery) {
+      debugPrint(
+          'PlaceID: ${d['placeId'].toString()}  ActID: ${d['actId'].toString()}');
     }
 
     return actNames;
@@ -306,7 +323,7 @@ class _DestinationsViewState extends State<DestinationsView> {
                 const Padding(
                   padding: EdgeInsets.only(right: 50, top: 40),
                   child: Text(
-                    'Famouse Places In Surigao',
+                    'Famous Places In Surigao',
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontFamily: 'Arial',
