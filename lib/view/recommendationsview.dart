@@ -23,16 +23,31 @@ class _RecommendationsViewState extends State<RecommendationsView> {
       'placeName',
       where: 'placeName LIKE ?',
       whereArgs: ['%${widget.placeName}%'],
-      columns: ['id'],
+      columns: ['id', 'placeName'],
     );
+    String pName = q.first['placeName'].toString();
+    pName = pName.substring(0, pName.length - 1);
+
     content.add(
       Container(
-        width: scrWidth * 0.7,
+        width: scrWidth * 0.8,
+        height: scrHeight * 0.15,
+        padding: const EdgeInsets.only(top: 35),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.green, width: 2),
+          color: const Color.fromARGB(188, 255, 255, 255),
+          borderRadius: BorderRadius.circular(15),
+          image: DecorationImage(
+            image: AssetImage('assets/ImageList/$pName.jpg'),
+            fit: BoxFit.fill,
+          ),
+        ),
         margin: const EdgeInsets.only(top: 10, bottom: 10),
         child: Text(
           'Hotels in ${widget.placeName}',
           textAlign: TextAlign.center,
           style: const TextStyle(
+            backgroundColor: Color.fromARGB(194, 255, 255, 255),
             fontFamily: 'Calibre',
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -40,6 +55,24 @@ class _RecommendationsViewState extends State<RecommendationsView> {
         ),
       ),
     );
+    String desc = await rootBundle.loadString('assets/text/desc/$pName.txt');
+    content.add(Container(
+      margin: const EdgeInsets.only(left: 10, right: 10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        desc,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontFamily: 'Times new roman',
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+    ));
     rescont.add(
       Container(
         width: scrWidth * 0.7,

@@ -321,27 +321,6 @@ class _DestinationsViewState extends State<DestinationsView> {
                   ),
                 ),
                 const Padding(
-                  padding: EdgeInsets.only(right: 50, top: 40),
-                  child: Text(
-                    'Famous Places In Surigao',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontFamily: 'Arial',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                FutureBuilder(
-                    future: loadImageList(),
-                    builder: ((context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        return snapshot.requireData;
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    })),
-                const Padding(
                   padding: EdgeInsets.only(right: 50, top: 20),
                   child: Text(
                     'Hotels Recommendations',

@@ -15,9 +15,9 @@ class Utility {
   }
 
   static Future<void> initTables() async {
-    final tableNames = List<String>.filled(8, "");
+    final tableNames = List<String>.filled(9, "");
 
-    final fileNames = List<String>.filled(8, "");
+    final fileNames = List<String>.filled(9, "");
     tableNames.setAll(0, [
       'activities',
       'deals',
@@ -27,6 +27,7 @@ class Utility {
       'placeName',
       'restaurants',
       'resAssoc',
+      'rating'
     ]);
     fileNames.setAll(0, [
       'activities',
@@ -37,18 +38,23 @@ class Utility {
       'placeName',
       'restaurant',
       'restaurantAssoc',
+      'NULL',
     ]);
 
-    for (var i = 0; i < fileNames.length; i++) {
+    for (var i = 0; i < tableNames.length; i++) {
       final csvName = fileNames[i];
       final tableName = tableNames[i];
       await _createTable(index: i, tablename: tableName);
-      await _initTable(csvfilename: csvName, tablename: tableName);
+      await _initTable(
+          csvfilename: csvName,
+          tablename: tableName,
+          doInit: i != tableNames.length - 1);
     }
   }
 
   static Future<void> _createTable(
       {required int index, required String tablename}) async {
+    debugPrint('Creating tables...');
     String schema = await rootBundle.loadString('assets/text/schema.txt');
     final parsed = schema.split('\n');
     var exist = await db!
@@ -61,7 +67,11 @@ class Utility {
   }
 
   static Future<void> _initTable(
-      {required String tablename, required String csvfilename}) async {
+      {required String tablename,
+      required String csvfilename,
+      required bool doInit}) async {
+    if (!doInit) return;
+
     String parse = await rootBundle.loadString('assets/csv/$csvfilename.csv');
 
     //await db.delete('rating');
