@@ -61,10 +61,8 @@ class _PropositionViewState extends State<PropositionView> {
     }
 
     for (var placeName in placeNames) {
-      String fileName = placeName != placeNames.last
-          ? placeName.substring(0, placeName.length - 1)
-          : placeName;
-
+      String fileName = placeName.substring(0, placeName.length - 1);
+      debugPrint('Filename: $fileName');
       ret.add(
         Container(
           width: scrWidth * 0.8,

@@ -73,7 +73,7 @@ class Utility {
     if (!doInit) return;
 
     String parse = await rootBundle.loadString('assets/csv/$csvfilename.csv');
-
+    parse = parse.substring(0, parse.length - 1);
     //await db.delete('rating');
 
     //await db.delete('deals');

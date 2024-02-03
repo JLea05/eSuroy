@@ -19,12 +19,21 @@ class _RecommendationsViewState extends State<RecommendationsView> {
 
     List<Widget> content = [];
     List<Widget> rescont = [];
+    debugPrint('${widget.placeName}');
+
+    var debug = await widget.db.query('placeName');
+
+    for (var d in debug) {
+      debugPrint('placeName: ${d['placeName'].toString()}');
+    }
+
     var q = await widget.db.query(
       'placeName',
       where: 'placeName LIKE ?',
       whereArgs: ['%${widget.placeName}%'],
       columns: ['id', 'placeName'],
     );
+    debugPrint('count: ${q.length}');
     String pName = q.first['placeName'].toString();
     pName = pName.substring(0, pName.length - 1);
 
@@ -55,6 +64,7 @@ class _RecommendationsViewState extends State<RecommendationsView> {
         ),
       ),
     );
+    debugPrint('Debug: pName = $pName');
     String desc = await rootBundle.loadString('assets/text/desc/$pName.txt');
     content.add(Container(
       margin: const EdgeInsets.only(left: 10, right: 10),
@@ -131,7 +141,7 @@ class _RecommendationsViewState extends State<RecommendationsView> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(top: 140),
+                    margin: const EdgeInsets.only(top: 100),
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                       color: Color.fromARGB(183, 255, 255, 255),
@@ -233,7 +243,7 @@ class _RecommendationsViewState extends State<RecommendationsView> {
             children: [
               Container(
                 width: scrWidth * 0.9,
-                margin: const EdgeInsets.only(top: 10),
+                margin: const EdgeInsets.only(top: 50),
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(255, 255, 255, 255),
                   borderRadius: BorderRadius.all(Radius.circular(15)),

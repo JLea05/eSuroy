@@ -88,15 +88,12 @@ class _MainViewState extends State<MainView> {
     List<Widget> list = [];
 
     var query = await db!.query('placeName', columns: ['placeName']);
-    int index = 0;
     for (var col in query) {
       String str = col['placeName'].toString();
-      if (index != query.length - 1) {
-        str = str.substring(0, str.length - 1);
-      }
+
+      str = str.substring(0, str.length - 1);
 
       str += '.jpg';
-      index++;
       list.add(Container(
         width: scrWidth * 0.5,
         height: scrHeight * 0.15,
